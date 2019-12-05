@@ -12,7 +12,7 @@ class ScalaTestAPP {
   }
 
   @Test def testReadSource() {
-    val path = "data/JavaApp.java"
+    val path = "data/testUnits/JavaApp.java"
     val srcReader = new plaintext.SourceCodeAnalyzer
     val src = srcReader.readSourceCode(path)
     println(src + "\n")
@@ -20,9 +20,8 @@ class ScalaTestAPP {
   }
 
   @Test def testParser() {
-    val path = "data/JavaApp.java"
-//    val p = new parser.Parser
-//    val src = p.parseFile(path)
-//    println(src)
+    val path = "data/testUnits/1.f.java"
+    val p = new parser.Parser
+    p.parseFile(path)
   }
 }

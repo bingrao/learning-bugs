@@ -85,14 +85,38 @@
             <version>1.2.17</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core -->
         <dependency>
             <groupId>com.github.javaparser</groupId>
-            <artifactId>javaparser-symbol-solver-core</artifactId>
-            <version>3.15.5</version>
+            <artifactId>javaparser-core-generators</artifactId>
+            <version>3.5.6</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core-generators</artifactId>
+            <version>3.5.6</version>
+        </dependency>
+        <!-- 		This dependency is a local jar that needs to be installed manually on maven -->
+        <!-- 	mvn install:install-file -Dfile="/lib/javalexer.jar"  -->
+        <!-- 	-DgroupId="edu.wm.cs"  -->
+        <!-- 	-DartifactId="javalexer"  -->
+        <!-- 	-Dversion="1"  -->
+        <!-- 	-Dpackaging="jar" -->
+        <dependency>
+            <groupId>edu.wm.cs</groupId>
+            <artifactId>javalexer</artifactId>
+            <version>1</version>
+        </dependency>
 
     </dependencies>
 

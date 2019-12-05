@@ -1,9 +1,9 @@
-
-
-
-
-org.mycat.netty.mysql.MySQLHandshakeHandler.logger,Flags.SERVER_STATUS_AUTOCOMMIT,org.mycat.netty.mysql.OK,channel,out.writeBytes,io.netty.channel.Channel,io.netty.buffer.ByteBuf,success,org.mycat.netty.mysql.MySQLHandshakeHandler.logger.debug,ok.sequenceId,ok.toPacket,ok.setStatusFlag,ok,channel.writeAndFlush,channel.alloc,
-VAR_15,VAR_11,VAR_7,VAR_3,VAR_12,VAR_2,VAR_5,VAR_1,VAR_4,VAR_9,VAR_13,VAR_10,VAR_8,VAR_14,VAR_6,
+io.netty.channel.Channel,io.netty.buffer.ByteBuf,org.mycat.netty.mysql.OK,
+TYPE_1,TYPE_2,TYPE_3,
+debug,writeBytes,success,toPacket,setStatusFlag,alloc,writeAndFlush,
+METHOD_2,METHOD_5,METHOD_1,METHOD_6,METHOD_4,METHOD_3,METHOD_7,
+org.mycat.netty.mysql.MySQLHandshakeHandler.logger,Flags.SERVER_STATUS_AUTOCOMMIT,ok.sequenceId,channel,ok,
+VAR_2,VAR_5,VAR_4,VAR_1,VAR_3,
 
 
 
