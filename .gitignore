@@ -187,7 +187,10 @@ venv.bak/
 
 \.idea/
 
-**/processed
+./benchmarks/**/processed
+./benchmarks/**/checkpoints
+./benchmarks/**/logs
+./benchmarks/**/data
 
 
 # End of https://www.gitignore.io/api/eclipse
