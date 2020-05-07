@@ -34,11 +34,11 @@ public class AbstractorMain {
 	
 	static void abstractCode() {
         String granularity = "method";
-        String inputCodePath1 = "data/testUnits/1.b.java";
-        String inputCodePath2 = "data/testUnits/1.f.java";
-        String outputCodePath1 = "data/testUnits/1.a_b.java";
-        String outputCodePath2 = "data/testUnits/1.a_f.java";
-        String idiomsFilePath = "data/idioms/idioms.csv";
+        String inputCodePath1 = "data/1/1.b.java";
+        String inputCodePath2 = "data/1/1.f.java";
+        String outputCodePath1 = "data/1/1.a_b.java";
+        String outputCodePath2 = "data/1/1.a_f.java";
+        String idiomsFilePath = "idioms/idioms.csv";
 
         Parser.CodeGranularity codeGranularity = getCodeGranularity(granularity);
 
