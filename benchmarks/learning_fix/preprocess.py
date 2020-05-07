@@ -6,7 +6,7 @@ from torchtext import data
 
 START_TOKEN = '<Start>'
 END_TOKEN = '<End>'
-
+UNK_TOKEN = 0
 
 class LFDataset(Dataset):
     def __init__(self,
