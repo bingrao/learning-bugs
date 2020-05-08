@@ -94,10 +94,10 @@ def data_gen(voc_size, batch, nbatches, seq_len = 15):
         # (batch_size, seq_len)
         data = torch.from_numpy(
             np.random.randint(1, voc_size, size=(batch, seq_len)))
-        data[:, 0] = 1 # add start token
+        data[:, 0] = 1  # add start token
         src = Variable(data, requires_grad=False)
         tgt = Variable(data, requires_grad=False)
-        yield Batch(src, tgt, 0)  # Accessed by next function one by one
+        yield Batch(src=src, trg=tgt, pad=0)  # Accessed by next function one by one
 
 
 def run_epoch(data_iter, model, loss_compute, ctx):

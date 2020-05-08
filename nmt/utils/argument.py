@@ -19,6 +19,7 @@ def get_main_argument(desc='Train Transformer'):
     parser.add_argument('--source', type=str, default="I am a chinese.")
     parser.add_argument('--save_result', type=str, default=None)
     parser.add_argument('--debug', type=str, default="False")
+    parser.add_argument('--position_style', type=str, choices=['sequence', 'tree'], default='sequence')
 
     # Prediction & Evalation
     # parser.add_argument('--share_dictionary', type=bool, default=False)

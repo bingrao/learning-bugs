@@ -6,7 +6,6 @@ from nmt.model.transformer.model import build_model
 from nmt.utils.context import Context
 from benchmarks.learning_fix.preprocess import dataset_generation
 from torch.utils.data import DataLoader
-import numpy as np
 import time
 from nmt.data.batch import Batch
 
@@ -19,7 +18,7 @@ class NoamOpt:
         self._step = 0
         self.warmup = warmup
         self.factor = factor
-        self.model_size = model.src_embed[0].d_model
+        self.model_size = model.src_embed.d_model
         self._rate = 0
 
     def step(self):
@@ -49,21 +48,34 @@ PAD_INDEX = 0
 
 
 def input_target_collate_fn(batch):
-    """merges a list of samples to form a mini-batch."""
 
-    sources_lengths = [len(sources) for sources, targets in batch]
-    targets_lengths = [len(targets) for sources, targets in batch]
+    """
+    merges a list of samples to form a mini-batch.
+    batch: (src, src_pos, tgt, tgt_pos)
+    """
 
-    sources_max_length = max(sources_lengths)
-    targets_max_length = max(targets_lengths)
+    src_max_len = max([len(src) for src, _, _, _ in batch])
+    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
 
-    sources_padded = [sources + [PAD_INDEX] * (sources_max_length - len(sources)) for sources, targets in batch]
-    targets_padded = [targets + [PAD_INDEX] * (targets_max_length - len(targets)) for sources, targets in batch]
+    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
+    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
 
-    sources_tensor = torch.tensor(sources_padded)
-    targets_tensor = torch.tensor(targets_padded)
+    srcs_pos_padded = [src_pos + list(range(max(src_pos) + 1, max(src_pos) + 1 + (src_max_len - len(src_pos))))
+                       for _, src_pos, _, _ in batch]
+    tgts_pos_padded = [tgt_pos + list(range(max(tgt_pos) + 1, max(tgt_pos) + 1 + (tgt_max_len - len(tgt_pos))))
+                       for _, _, _, tgt_pos in batch]
 
-    return Batch(sources_tensor, targets_tensor, PAD_INDEX)
+    srcs_tensor = torch.tensor(srcs_padded)
+    tgts_tensor = torch.tensor(tgts_padded)
+    srcs_pos_tensor = torch.tensor(srcs_pos_padded)
+    tgts_pos_tensor = torch.tensor(tgts_pos_padded)
+
+    # print(f"srcs {srcs_tensor.size()}" +
+    #       f"srcs_pos {srcs_pos_tensor.size()} " +
+    #       f"tgts {tgts_tensor.size()} " +
+    #       f"tgts_pos{tgts_pos_tensor.size()} \n")
+    # print("*********************************************************\n\n")
+    return Batch(src=srcs_tensor, trg=tgts_tensor, pad=PAD_INDEX, src_pos=srcs_pos_tensor, trg_pos=tgts_pos_tensor)
 
 
 class SimpleLossComputeWithLablSmoothing:
@@ -208,7 +220,7 @@ class DataProcessEngine:
             loss = self.run_epoch(self.eval_iter,
                                   loss_func(self.model.generator, criterion, opt=None))
 
-            self.logger.info("The model loss is %d", loss)
+            self.logger.info("Epoch Step: %d, \tLoss: %f", epoch, loss)
 
     def run_epoch(self, data_iter, loss_compute):
         """
@@ -221,13 +233,20 @@ class DataProcessEngine:
         for i, batch in enumerate(data_iter):
 
             src = batch.src.to(self.context.device) if self.context.is_cuda else batch.src
+            src_pos = batch.src_pos.to(self.context.device) if self.context.is_cuda else batch.src_pos
             trg = batch.trg.to(self.context.device) if self.context.is_cuda else batch.trg
+            trg_pos = batch.trg_pos.to(self.context.device) if self.context.is_cuda else batch.trg_pos
             trg_y = batch.trg_y.to(self.context.device) if self.context.is_cuda else batch.trg_y
             src_mask = batch.src_mask.to(self.context.device) if self.context.is_cuda else batch.src_mask
             tgt_mask = batch.trg_mask.to(self.context.device) if self.context.is_cuda else batch.trg_mask
 
             # Model forward and output result
-            out = self.model(src, trg, src_mask, tgt_mask)
+            out = self.model(src=src,
+                             tgt=trg,
+                             src_mask=src_mask,
+                             tgt_mask=tgt_mask,
+                             src_pos=src_pos,
+                             tgt_pos=trg_pos)
 
             # Get loss for this iteration and backward weight to model
             loss = loss_compute(out, trg_y, batch.ntokens)
@@ -237,7 +256,7 @@ class DataProcessEngine:
             tokens += batch.ntokens
             if i % 50 == 1:
                 elapsed = time.time() - start
-                self.logger.info("Epoch Step: %d Loss: %f Tokens per Sec: %f",
+                self.logger.info("Iteration Step: %d, \tLoss: %f, \tTokens per Sec: %f",
                                  i, loss / batch.ntokens, tokens / elapsed)
                 start = time.time()
                 tokens = 0

@@ -221,10 +221,12 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol):
         ys = torch.cat([ys, torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=1)
     return ys
 
+
 def rebatch(pad_idx, batch):
     """Fix order in torchtext to match ours"""
     src, trg = batch.src.transpose(0, 1), batch.trg.transpose(0, 1)
-    return Batch(src, trg, pad_idx)
+    return Batch(src=src, trg=trg, pad=pad_idx)
+
 
 def run_epoch(data_iter, model, loss_compute, ctx):
     """Standard Training and Logging Function"""

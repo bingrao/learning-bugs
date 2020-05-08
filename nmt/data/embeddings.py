@@ -66,32 +66,53 @@ class PositionalEncoding(torch.nn.Module):
         self.dropout = torch.nn.Dropout(p=dropout)
         self.context = ctx
         # Compute the positional encodings once in log space.
-        pe = torch.zeros(max_len, d_model)
+        pe = torch.zeros(max_len, d_model)  # dim: (max_len, d_model)
+
         # In a sentense, it consists of several words which is indexed from 0.
         # Here max_len means the max number of words can hold by a input sentense.
-        # We create refer table [[pe]] with 3D dimension (1 * max_len * d_model),
-        position = torch.arange(0, max_len).unsqueeze(1)
-        div_term = torch.exp((torch.arange(0, d_model, 2) *
-                             -(math.log(10000.0) / d_model)).float())
+        # We create refer table [[pe]] with 3D dimension (1, max_len, d_model),
+        position = torch.arange(0, max_len).unsqueeze(1)  # dim: (max_len, 1)
+        div_term = torch.exp((torch.arange(0, d_model, 2) *      # tensor([ 0,  2,  4, ..., d_model])
+                             -(math.log(10000.0) / d_model)).float())  #
         # In index of numpy or tensor, start:end:step  0:d_model:2 = 0:-1:2
-        pe[:, 0::2] = torch.sin(position.float() * div_term)
-        pe[:, 1::2] = torch.cos(position.float() * div_term)
-        pe = pe.unsqueeze(0)
+        # position.float() * div_term --> dim: (max_len, d_model/2)
+        pe[:, 0::2] = torch.sin(position.float() * div_term)  # Replace values in the even position of cols: [0, 2, ..]
+        pe[:, 1::2] = torch.cos(position.float() * div_term)  # Replace values in the odd positions of cols: [1, 3, ..]
+        pe = pe.unsqueeze(0)  # dim: (1, max_len, d_model)
         self.register_buffer('pe', pe)
 
-
-    def forward(self, x, step=None):
+    def forward(self, x, step=None, position=None):
         """
-        :param x: 3D deminsion input with a batch of input (batch_size, max_len_centense, d_model).
+        :param x: 3D deminsion input with a batch of input (batch_size, seq_len, d_model).
                   We can see the input like: there are [[batch_size]] size of sentence,
-                  In each sentence, there are [[max_len_centense]] size of words
+                  In each sentence, there are [[seq_len]] size of words
                   each word is embedded as 1D [[d_model]] dimension feature vector.
         :param step:
+        :param position:
         :return:
         """
 
         if step is None:
-            x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
+            if position is None:
+                """
+                By default, a position of tokens in a sentence/code is in a sequential order and 
+                indexed by [0, 1, 2, ..., seq_len-1]. So in our positional embedding, we just
+                take first "seq_len" positional embedding value in pe, and add them to 
+                corresponding x embedding as a combination embedding representation of input x
+                """
+                x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
+            else:
+                """
+                We argue that tokens' positions usually are in a customized order, rather than 
+                in a sequential order, for example in a tree-based order, which make positional 
+                embedding more meaningful. In this case, we require programmers to provide position
+                information for each sentence/code as a list of indexed number, for example [0, 3, 1, 5, 4, ...].
+                As we can see here, the indexed numbers are not in a sequential order.  Then we refer
+                [[self.pe]] to look up the corresponding positional embedding and add them to the input x.
+                """
+                batch_size, seq_len = position.size()  # dim: (batch_size, seq_len)
+                pos_embedding = torch.cat([self.pe[:, position[idx, :]] for idx in range(batch_size)])
+                x = x + Variable(pos_embedding, requires_grad=False)
         else:
             x = x + Variable(self.pe[:, step])
         return self.dropout(x)
@@ -99,10 +120,10 @@ class PositionalEncoding(torch.nn.Module):
 
 # Source and target input embedding
 class Embeddings(torch.nn.Module):
-    def __init__(self, d_model, vocab):
+    def __init__(self, d_model, vocab_size):
         super(Embeddings, self).__init__()
-        self.lut = torch.nn.Embedding(num_embeddings = vocab,
-                                      embedding_dim = d_model)
+        self.lut = torch.nn.Embedding(num_embeddings=vocab_size,
+                                      embedding_dim=d_model)
         self.d_model = d_model
 
     def forward(self, x):
@@ -112,3 +133,16 @@ class Embeddings(torch.nn.Module):
         """
         return self.lut(x) * math.sqrt(self.d_model)
 
+
+class TransformerEmbeddings(torch.nn.Module):
+    def __init__(self, ctx, d_model, vocab_size, dropout, max_len=5000):
+        super(TransformerEmbeddings, self).__init__()
+        self.context = ctx,
+        self.d_model = d_model
+        self.input_embedding = Embeddings(d_model, vocab_size)
+        self.positional_embedding = PositionalEncoding(ctx, d_model, dropout, max_len)
+
+    def forward(self, x, step=None, position=None):
+        x = self.input_embedding(x)
+        x = self.positional_embedding(x, step=step, position=position)
+        return x

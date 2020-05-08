@@ -5,6 +5,14 @@ from os import makedirs
 import os
 import torch
 import json
+import random
+import numpy as np
+
+
+def init_rng(seed=0):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.random.manual_seed(seed)
 
 
 def create_dir(dir_path):
@@ -79,6 +87,7 @@ class Context:
         self.epochs = self.config["epochs"]
         self.vocabulary_size = self.config["vocabulary_size"]
         self.padding_index = 0
+        self.position_style = self.config["position_style"]
 
         self.dataset_limit = self.config["dataset_limit"]
         self.print_every = self.config["print_every"]
@@ -96,3 +105,4 @@ class Context:
         self.is_cuda = self.config["device"] == 'cuda'
         self.is_cpu = self.config["device"] == 'cpu'
         self.is_gpu_parallel = self.is_cuda and (len(self.device_id) > 1)
+        init_rng(seed=0)
