@@ -63,6 +63,7 @@ class LFDataset(Dataset):
         raw_data_path = join(self.processed_dir, f'{self.target}-raw.txt')
         raw_token_path = join(self.processed_dir, f'{self.target}-token.txt')
         raw_idx_path = join(self.processed_dir, f'{self.target}-index.txt')
+        raw_pos_path = join(self.processed_dir, f'{self.target}-pos.txt')
 
         with open(src_path) as src_file:
             src_raw_data = src_file.readlines()
@@ -71,7 +72,8 @@ class LFDataset(Dataset):
 
         with open(raw_data_path, 'w') as f1, \
                 open(raw_token_path, 'w') as f2, \
-                open(raw_idx_path, 'w') as f3:
+                open(raw_idx_path, 'w') as f3, \
+                open(raw_pos_path, 'w') as f4:
 
             for src_line, tgt_line in zip(src_raw_data, tgt_raw_data):
                 src_tokens = list(src_line.split())
@@ -88,6 +90,7 @@ class LFDataset(Dataset):
                     f1.write(f'{src_line}\t{tgt_line}\n')
                     f2.write(f'{src_tokens}\t{tgt_tokens}\n')
                     f3.write(f'{src_index}\t{tgt_index}\n')
+                    f4.write(f'{src_pos}\t{tgt_pos}\n')
 
                 self.data.append((src_index, src_pos, tgt_index, tgt_pos))
 
