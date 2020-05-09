@@ -139,6 +139,7 @@ public class JLexerTokenizer {
 		//Extract tokens
 		List<Token> tokens = new ArrayList<>();
 		for (Token t = jLexer.nextToken(); t.getType() != Token.EOF; t = jLexer.nextToken()) {
+//			System.out.println("The token is " + t);
 			tokens.add(t);
 		}
 
