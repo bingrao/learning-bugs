@@ -28,7 +28,7 @@ class Vocabulary:
         self.downcase = downcase
         self.delimiter = delimiter
         self.word_with_count = self._build_vocab()  # [('key', 100), ..., ('for', 1)]
-        self.words = [word for word, _ in self.word_with_count]  # ['key', ..., 'for', 1]
+        self.words = [word for word, _ in self.word_with_count]  # ['key', ..., 'for']
         self.word2idx = dict((w, i) for i, w in enumerate(self.words))
         self.idx2word = dict((i, w) for i, w in enumerate(self.words))
 
@@ -41,15 +41,21 @@ class Vocabulary:
         return self.__len__()
 
     def get_token_embedding(self, token):
+        """
+        If user provide a embedding method, use it, otherwise use the index instead.
+        """
         return self.token_embedding(token) \
             if self.token_embedding is not None \
             else self.words.index(token) if token in self.words else self.unk_token
 
-    def add_start_end_token(self, seq_tokens):
+    def wrapping_tokens(self, seq_tokens):
+        """
+        wrapping takens with a start token in the head and an end token in the tail.
+        """
         return [self.start_token] + seq_tokens + [self.end_token]
 
     def _build_vocab(self):
-        self.logger.info(f"Building vocab {self.target} with max size {self.max_vocab_size}")
+        self.logger.info(f"Building {self.target} vocabulary with max size {self.max_vocab_size}")
 
         # Counter for all tokens in the vocabulary
         cnt = collections.Counter()
@@ -67,16 +73,19 @@ class Vocabulary:
                     tokens = [self.start_token] + tokens + [self.end_token]
                 cnt.update(tokens)
 
-        self.logger.info("Found %d unique tokens in the vocabulary.", len(cnt))
+        self.logger.info(f"Found {len(cnt)} unique tokens in the {self.target} vocabulary.")
 
         # Filter tokens below the frequency threshold
         if self.min_frequency > 0:
             filtered_tokens = [(w, c) for w, c in cnt.most_common() if c > self.min_frequency]
             cnt = collections.Counter(dict(filtered_tokens))
 
-        self.logger.info("Found %d unique tokens with frequency > %d.", len(cnt), self.min_frequency)
+        self.logger.info(f"Found {len(cnt)} unique tokens with frequency "
+                         f"> {self.min_frequency} in the {self.target} vocabulary.")
 
-        # Sort tokens by 1. frequency 2. lexically to break ties
+        # Sort tokens by:
+        #    1. frequency
+        #    2. lexically to break ties
         word_with_counts = cnt.most_common()
         word_with_counts = sorted(word_with_counts, key=lambda x: (x[1], x[0]), reverse=True)
 

@@ -1,10 +1,10 @@
 from torch import nn
 import copy
-from nmt.data.embeddings import Embeddings, PositionalEncoding, TransformerEmbeddings
+from nmt.data.embeddings import TransformerEmbeddings
 from nmt.model.transformer.encoder import Encoder, EncoderLayer
 from nmt.model.transformer.decoder import Decoder, DecoderLayer
 from nmt.model.common import PositionwiseFeedForward, Generator
-from nmt.model.attention import MultiHeadedAttention, MultiHeadAttentionWithMetrics
+from nmt.model.attention import MultiHeadedAttention
 
 
 class Transformer(nn.Module):
@@ -84,10 +84,8 @@ def build_model(ctx, src_vocab_size, tgt_vocab_size):
     d_ff = ctx.d_ff  # d_ff=2048,
     h = ctx.heads_count  # h=8,
     dropout = ctx.dropout  # dropout=0.1
-    # attn = MultiHeadAttentionWithMetrics(ctx, h, d_model, dropout)
     attn = MultiHeadedAttention(ctx, h, d_model)
     ff = PositionwiseFeedForward(ctx, d_model, d_ff, dropout)
-    # position = PositionalEncoding(ctx, d_model, dropout)
 
     model = Transformer(ctx=ctx,
                         encoder=Encoder(ctx,
@@ -102,8 +100,6 @@ def build_model(ctx, src_vocab_size, tgt_vocab_size):
                                         tgt_vocab_size),
                         src_embed=TransformerEmbeddings(ctx, d_model, src_vocab_size, dropout),
                         tgt_embed=TransformerEmbeddings(ctx, d_model, tgt_vocab_size, dropout),
-                        # src_embed=nn.Sequential(Embeddings(d_model, src_vocab_size), c(position)),
-                        # tgt_embed=nn.Sequential(Embeddings(d_model, tgt_vocab_size), c(position)),
                         generator=Generator(d_model, tgt_vocab_size))
 
     # This was important from their code.

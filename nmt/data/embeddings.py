@@ -61,7 +61,7 @@ class PositionalEncoding(torch.nn.Module):
        d_model (int): embedding size  d_model
     """
 
-    def __init__(self, ctx, d_model, dropout, max_len=5000):
+    def __init__(self, ctx, d_model, dropout, max_len=1000):
         super(PositionalEncoding, self).__init__()
         self.dropout = torch.nn.Dropout(p=dropout)
         self.context = ctx
@@ -93,7 +93,20 @@ class PositionalEncoding(torch.nn.Module):
         """
 
         if step is None:
-            if position is None:
+            if position is not None and self.context.position_style == 'tree':
+
+                """
+                We argue that tokens' positions usually are in a customized order, rather than 
+                in a sequential order, for example in a tree-based order, which make positional 
+                embedding more meaningful. In this case, we require programmers to provide position
+                information for each sentence/code as a list of indexed number, for example [0, 3, 1, 5, 4, ...].
+                As we can see here, the indexed numbers are not in a sequential order. Then we refer
+                [[self.pe]] to look up the corresponding positional embedding and add them to the input x.
+                """
+                batch_size, seq_len = position.size()  # dim: (batch_size, seq_len)
+                pos_embedding = torch.cat([self.pe[:, position[i, :]] for i in range(batch_size)])
+                x = x + Variable(pos_embedding, requires_grad=False)
+            else:
                 """
                 By default, a position of tokens in a sentence/code is in a sequential order and 
                 indexed by [0, 1, 2, ..., seq_len-1]. So in our positional embedding, we just
@@ -101,18 +114,6 @@ class PositionalEncoding(torch.nn.Module):
                 corresponding x embedding as a combination embedding representation of input x
                 """
                 x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
-            else:
-                """
-                We argue that tokens' positions usually are in a customized order, rather than 
-                in a sequential order, for example in a tree-based order, which make positional 
-                embedding more meaningful. In this case, we require programmers to provide position
-                information for each sentence/code as a list of indexed number, for example [0, 3, 1, 5, 4, ...].
-                As we can see here, the indexed numbers are not in a sequential order.  Then we refer
-                [[self.pe]] to look up the corresponding positional embedding and add them to the input x.
-                """
-                batch_size, seq_len = position.size()  # dim: (batch_size, seq_len)
-                pos_embedding = torch.cat([self.pe[:, position[idx, :]] for idx in range(batch_size)])
-                x = x + Variable(pos_embedding, requires_grad=False)
         else:
             x = x + Variable(self.pe[:, step])
         return self.dropout(x)
@@ -120,8 +121,9 @@ class PositionalEncoding(torch.nn.Module):
 
 # Source and target input embedding
 class Embeddings(torch.nn.Module):
-    def __init__(self, d_model, vocab_size):
+    def __init__(self, ctx, d_model, vocab_size):
         super(Embeddings, self).__init__()
+        self.context = ctx
         self.lut = torch.nn.Embedding(num_embeddings=vocab_size,
                                       embedding_dim=d_model)
         self.d_model = d_model
@@ -135,14 +137,14 @@ class Embeddings(torch.nn.Module):
 
 
 class TransformerEmbeddings(torch.nn.Module):
-    def __init__(self, ctx, d_model, vocab_size, dropout, max_len=5000):
+    def __init__(self, ctx, d_model, vocab_size, dropout, max_len=1000):
         super(TransformerEmbeddings, self).__init__()
         self.context = ctx,
         self.d_model = d_model
-        self.input_embedding = Embeddings(d_model, vocab_size)
+        self.embedding = Embeddings(self.context, d_model, vocab_size)
         self.positional_embedding = PositionalEncoding(ctx, d_model, dropout, max_len)
 
     def forward(self, x, step=None, position=None):
-        x = self.input_embedding(x)
-        x = self.positional_embedding(x, step=step, position=position)
-        return x
+        x_embedding = self.embedding(x)
+        x_embedding_with_pos = self.positional_embedding(x_embedding, step=step, position=position)
+        return x_embedding_with_pos

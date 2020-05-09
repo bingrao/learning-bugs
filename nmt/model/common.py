@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 """
-Simple layers
+Reference Resource about Simple layers
 https://nn.readthedocs.io/en/rtd/simple/index.html
 """
 def clones(module, N):

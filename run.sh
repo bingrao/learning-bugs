@@ -48,7 +48,7 @@ case ${model} in
                               --project_processed_dir="${ProjectProcessedDataDir}" \
                               --project_log="${ProjectLog}" \
                               --project_checkpoint="${ProjectCheckpoint}" \
-                              --debug=True \
+                              --debug=False \
                               --phase="${model}"
   ;;
   "train")

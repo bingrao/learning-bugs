@@ -8,16 +8,16 @@ class Batch:
         self.src = src
         self.src_pos = src_pos
         self.tgt = trg
-        self.trg_pos = trg_pos
         self.pad = pad
         # -1 means last dimension, -2 last second dimension
         self.src_mask = (src != pad).unsqueeze(-2)
         if trg is not None:
             self.trg = trg[:, :-1]  # remove last column
-            self.trg_pos = trg_pos[:, :-1]
             self.trg_y = trg[:, 1:]  # remove first column
             self.trg_mask = make_std_mask(self.trg, pad)
             self.ntokens = (self.trg_y != pad).data.sum()
+        if trg_pos is not None:
+            self.trg_pos = trg_pos[:, :-1]
 
 
 def custom_collate_fn(batches):
@@ -49,7 +49,7 @@ def custom_collate_fn(batches):
     return Batch(src=src, trg=tgt, pad=batches[0].pad)
 
 
-def default_run_epoch(data_iter, model, loss_compute, ctx):
+def template_run_epoch(data_iter, model, loss_compute, ctx):
     """Standard Training and Logging Function"""
     start = time.time()
     total_tokens = 0
