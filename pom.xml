@@ -106,12 +106,12 @@
             <artifactId>javaparser-core-generators</artifactId>
             <version>3.5.6</version>
         </dependency>
-        <!-- 		This dependency is a local jar that needs to be installed manually on maven -->
-        <!-- 	mvn install:install-file -Dfile="/lib/javalexer.jar"  -->
-        <!-- 	-DgroupId="edu.wm.cs"  -->
-        <!-- 	-DartifactId="javalexer"  -->
-        <!-- 	-Dversion="1"  -->
-        <!-- 	-Dpackaging="jar" -->
+        <!--    This dependency is a local jar that needs to be installed manually on maven, then rebuild project-->
+        <!--    mvn install:install-file -Dfile=./lib/javalexer.jar
+                -DgroupId=edu.wm.cs
+                -DartifactId=javalexer
+                -Dversion=1
+                -Dpackaging=jar-->
         <dependency>
             <groupId>edu.wm.cs</groupId>
             <artifactId>javalexer</artifactId>

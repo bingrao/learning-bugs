@@ -84,7 +84,7 @@ public class AbstractorMain {
 
 
 	private static Parser.CodeGranularity getCodeGranularity(String granularity) {
-		Parser.CodeGranularity codeGranularity = Parser.CodeGranularity.METHOD;;
+		Parser.CodeGranularity codeGranularity = Parser.CodeGranularity.METHOD;
 		
 		if(granularity.equalsIgnoreCase(GRANULARITY_METHOD)) {
 			codeGranularity = Parser.CodeGranularity.METHOD;

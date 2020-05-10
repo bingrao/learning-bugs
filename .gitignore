@@ -75,7 +75,7 @@ buildNumber.properties
 
 # Intellij IDA
 .idea/
-
+*.iml
 
 checkpoints/
 logs/
