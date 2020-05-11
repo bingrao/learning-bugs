@@ -56,10 +56,27 @@
     <orderEntry type="library" name="Maven: org.scalatest:scalatest-shouldmatchers_2.11:3.2.0-M1" level="project" />
     <orderEntry type="library" name="Maven: org.scalatest:scalatest-mustmatchers_2.11:3.2.0-M1" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
-    <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-core-generators:3.5.6" level="project" />
-    <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-core:3.5.6" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4:4.5.3" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Maven: fr.inria.gforge.spoon:spoon-core:8.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jdt:org.eclipse.jdt.core:3.18.0" level="project" />
+    <orderEntry type="library" name="Maven: com.martiansoftware:jsap:2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.13.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-to-slf4j:2.13.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.maven:maven-model:3.5.0" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-utils:3.0.24" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.tukaani:xz:1.8" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.9.10.3" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.10" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.9.10" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.19" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.maven.shared:maven-invoker:3.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.maven.shared:maven-shared-utils:3.2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-component-annotations:1.7.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.5" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.7.5" level="project" />
+    <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-core:3.15.17" level="project" />
     <orderEntry type="library" name="Maven: edu.wm.cs:javalexer:1" level="project" />
   </component>
 </module>

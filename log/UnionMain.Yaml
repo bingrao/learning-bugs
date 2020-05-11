@@ -1,0 +1,61 @@
+package org.ucf.ml;
+
+public class JavaApp {
+
+    public static void main(String[] args) {
+        System.out.println("This will be printed");
+    }
+}
+---
+root(Type=CompilationUnit): 
+    packageDeclaration(Type=PackageDeclaration): 
+        name(Type=Name): 
+            identifier: "ml"
+            qualifier(Type=Name): 
+                identifier: "ucf"
+                qualifier(Type=Name): 
+                    identifier: "org"
+    types: 
+        - type(Type=ClassOrInterfaceDeclaration): 
+            isInterface: "false"
+            name(Type=SimpleName): 
+                identifier: "JavaApp"
+            members: 
+                - member(Type=MethodDeclaration): 
+                    body(Type=BlockStmt): 
+                        statements: 
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "println"
+                                    scope(Type=FieldAccessExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "out"
+                                        scope(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "System"
+                                    arguments: 
+                                        - argument(Type=StringLiteralExpr): 
+                                            value: "This will be printed"
+                    type(Type=VoidType): 
+                    name(Type=SimpleName): 
+                        identifier: "main"
+                    modifiers: 
+                        - modifier(Type=Modifier): 
+                            keyword: "PUBLIC"
+                        - modifier(Type=Modifier): 
+                            keyword: "STATIC"
+                    parameters: 
+                        - parameter(Type=Parameter): 
+                            isVarArgs: "false"
+                            name(Type=SimpleName): 
+                                identifier: "args"
+                            type(Type=ArrayType): 
+                                origin: "TYPE"
+                                componentType(Type=ClassOrInterfaceType): 
+                                    name(Type=SimpleName): 
+                                        identifier: "String"
+            modifiers: 
+                - modifier(Type=Modifier): 
+                    keyword: "PUBLIC"
+...

@@ -1,7 +1,7 @@
 package org.ucf.ml.utils
 import  org.apache.log4j.Logger
 
-class Log(name:String){
+class Logging(name:String){
   private val logger = Logger.getLogger(name)
 
   def info(message:String,prefix:Boolean = true) =
