@@ -1,25 +1,22 @@
-package org.ucf.ml;
+public class DummyClass {
 
-public class JavaApp {
-
-    public static void main(String[] args) {
-        System.out.println("This will be printed");
+    private void success(io.netty.channel.Channel channel) {
+        org.mycat.netty.mysql.MySQLHandshakeHandler.logger.info("success info return form MySQLHandshakeHandler");
+        io.netty.buffer.ByteBuf out = channel.alloc().buffer();
+        org.mycat.netty.mysql.OK ok = new org.mycat.netty.mysql.OK();
+        ok.sequenceId = 2;
+        ok.setStatusFlag(Flags.SERVER_STATUS_AUTOCOMMIT);
+        out.writeBytes(ok.toPacket());
+        channel.writeAndFlush(out);
     }
 }
 ---
 root(Type=CompilationUnit): 
-    packageDeclaration(Type=PackageDeclaration): 
-        name(Type=Name): 
-            identifier: "ml"
-            qualifier(Type=Name): 
-                identifier: "ucf"
-                qualifier(Type=Name): 
-                    identifier: "org"
     types: 
         - type(Type=ClassOrInterfaceDeclaration): 
             isInterface: "false"
             name(Type=SimpleName): 
-                identifier: "JavaApp"
+                identifier: "DummyClass"
             members: 
                 - member(Type=MethodDeclaration): 
                     body(Type=BlockStmt): 
@@ -27,34 +24,165 @@ root(Type=CompilationUnit):
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
-                                        identifier: "println"
+                                        identifier: "info"
                                     scope(Type=FieldAccessExpr): 
                                         name(Type=SimpleName): 
-                                            identifier: "out"
-                                        scope(Type=NameExpr): 
+                                            identifier: "logger"
+                                        scope(Type=FieldAccessExpr): 
                                             name(Type=SimpleName): 
-                                                identifier: "System"
+                                                identifier: "MySQLHandshakeHandler"
+                                            scope(Type=FieldAccessExpr): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "mysql"
+                                                scope(Type=FieldAccessExpr): 
+                                                    name(Type=SimpleName): 
+                                                        identifier: "netty"
+                                                    scope(Type=FieldAccessExpr): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "mycat"
+                                                        scope(Type=NameExpr): 
+                                                            name(Type=SimpleName): 
+                                                                identifier: "org"
                                     arguments: 
                                         - argument(Type=StringLiteralExpr): 
-                                            value: "This will be printed"
+                                            value: "success info return form MySQLHandshakeHandler"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=VariableDeclarationExpr): 
+                                    variables: 
+                                        - variable(Type=VariableDeclarator): 
+                                            initializer(Type=MethodCallExpr): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "buffer"
+                                                scope(Type=MethodCallExpr): 
+                                                    name(Type=SimpleName): 
+                                                        identifier: "alloc"
+                                                    scope(Type=NameExpr): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "channel"
+                                            name(Type=SimpleName): 
+                                                identifier: "out"
+                                            type(Type=ClassOrInterfaceType): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "ByteBuf"
+                                                scope(Type=ClassOrInterfaceType): 
+                                                    name(Type=SimpleName): 
+                                                        identifier: "buffer"
+                                                    scope(Type=ClassOrInterfaceType): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "netty"
+                                                        scope(Type=ClassOrInterfaceType): 
+                                                            name(Type=SimpleName): 
+                                                                identifier: "io"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=VariableDeclarationExpr): 
+                                    variables: 
+                                        - variable(Type=VariableDeclarator): 
+                                            initializer(Type=ObjectCreationExpr): 
+                                                type(Type=ClassOrInterfaceType): 
+                                                    name(Type=SimpleName): 
+                                                        identifier: "OK"
+                                                    scope(Type=ClassOrInterfaceType): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "mysql"
+                                                        scope(Type=ClassOrInterfaceType): 
+                                                            name(Type=SimpleName): 
+                                                                identifier: "netty"
+                                                            scope(Type=ClassOrInterfaceType): 
+                                                                name(Type=SimpleName): 
+                                                                    identifier: "mycat"
+                                                                scope(Type=ClassOrInterfaceType): 
+                                                                    name(Type=SimpleName): 
+                                                                        identifier: "org"
+                                            name(Type=SimpleName): 
+                                                identifier: "ok"
+                                            type(Type=ClassOrInterfaceType): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "OK"
+                                                scope(Type=ClassOrInterfaceType): 
+                                                    name(Type=SimpleName): 
+                                                        identifier: "mysql"
+                                                    scope(Type=ClassOrInterfaceType): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "netty"
+                                                        scope(Type=ClassOrInterfaceType): 
+                                                            name(Type=SimpleName): 
+                                                                identifier: "mycat"
+                                                            scope(Type=ClassOrInterfaceType): 
+                                                                name(Type=SimpleName): 
+                                                                    identifier: "org"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=AssignExpr): 
+                                    operator: "ASSIGN"
+                                    target(Type=FieldAccessExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "sequenceId"
+                                        scope(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "ok"
+                                    value(Type=IntegerLiteralExpr): 
+                                        value: "2"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "setStatusFlag"
+                                    scope(Type=NameExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "ok"
+                                    arguments: 
+                                        - argument(Type=FieldAccessExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "SERVER_STATUS_AUTOCOMMIT"
+                                            scope(Type=NameExpr): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "Flags"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "writeBytes"
+                                    scope(Type=NameExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "out"
+                                    arguments: 
+                                        - argument(Type=MethodCallExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "toPacket"
+                                            scope(Type=NameExpr): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "ok"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "writeAndFlush"
+                                    scope(Type=NameExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "channel"
+                                    arguments: 
+                                        - argument(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "out"
                     type(Type=VoidType): 
                     name(Type=SimpleName): 
-                        identifier: "main"
+                        identifier: "success"
                     modifiers: 
                         - modifier(Type=Modifier): 
-                            keyword: "PUBLIC"
-                        - modifier(Type=Modifier): 
-                            keyword: "STATIC"
+                            keyword: "PRIVATE"
                     parameters: 
                         - parameter(Type=Parameter): 
                             isVarArgs: "false"
                             name(Type=SimpleName): 
-                                identifier: "args"
-                            type(Type=ArrayType): 
-                                origin: "TYPE"
-                                componentType(Type=ClassOrInterfaceType): 
+                                identifier: "channel"
+                            type(Type=ClassOrInterfaceType): 
+                                name(Type=SimpleName): 
+                                    identifier: "Channel"
+                                scope(Type=ClassOrInterfaceType): 
                                     name(Type=SimpleName): 
-                                        identifier: "String"
+                                        identifier: "channel"
+                                    scope(Type=ClassOrInterfaceType): 
+                                        name(Type=SimpleName): 
+                                            identifier: "netty"
+                                        scope(Type=ClassOrInterfaceType): 
+                                            name(Type=SimpleName): 
+                                                identifier: "io"
             modifiers: 
                 - modifier(Type=Modifier): 
                     keyword: "PUBLIC"

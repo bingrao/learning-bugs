@@ -1,9 +1,0 @@
-package org.ucf.ml;
-
-public class JavaApp {
-
-    public static void main(String[] args) {
-        System.out.println("This will be printed");
-    }
-}
-<root type='CompilationUnit'><packageDeclaration type='PackageDeclaration'><name type='Name' identifier='ml'><qualifier type='Name' identifier='ucf'><qualifier type='Name' identifier='org'></qualifier></qualifier></name></packageDeclaration><types><type type='ClassOrInterfaceDeclaration' isInterface='false'><name type='SimpleName' identifier='JavaApp'></name><members><member type='MethodDeclaration'><body type='BlockStmt'><statements><statement type='ExpressionStmt'><expression type='MethodCallExpr'><name type='SimpleName' identifier='println'></name><scope type='FieldAccessExpr'><name type='SimpleName' identifier='out'></name><scope type='NameExpr'><name type='SimpleName' identifier='System'></name></scope></scope><arguments><argument type='StringLiteralExpr' value='This will be printed'></argument></arguments></expression></statement></statements></body><type type='VoidType'></type><name type='SimpleName' identifier='main'></name><modifiers><modifier type='Modifier' keyword='PUBLIC'></modifier><modifier type='Modifier' keyword='STATIC'></modifier></modifiers><parameters><parameter type='Parameter' isVarArgs='false'><name type='SimpleName' identifier='args'></name><type type='ArrayType' origin='TYPE'><componentType type='ClassOrInterfaceType'><name type='SimpleName' identifier='String'></name></componentType></type></parameter></parameters></member></members><modifiers><modifier type='Modifier' keyword='PUBLIC'></modifier></modifiers></type></types></root>

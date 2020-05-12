@@ -4,7 +4,7 @@ package parser
 import java.io.IOException
 import java.nio.file.{Files, Paths}
 
-abstract class Granularity extends utils.context {
+abstract class Granularity extends utils.Common {
   protected def readSourceCode(input:String) = {
     val reg:String = try {
       if(Files.exists(Paths.get(input))){
@@ -20,6 +20,7 @@ abstract class Granularity extends utils.context {
         EMPTY_STRING
       }
     }
+    // Remove all comments and anotations in the source code
     reg.replaceAll("(?:/\\*(?:[^*]|(?:\\*+[^*/]))*\\*+/)|(?://.*)","") //remove comments
        .replaceAll("@.+", "") //remove annotations
   }
