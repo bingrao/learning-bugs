@@ -9,8 +9,7 @@ import com.github.javaparser.ast.expr.{MethodCallExpr, MethodReferenceExpr, Simp
 import scala.collection.JavaConversions._
 import java.util.stream.Collectors
 
-class JavaParser
-  extends utils.Common with Visitor {
+class JavaParser extends Visitor  {
 
   private val ctx = new utils.Context
   def getContext = this.ctx
@@ -56,48 +55,6 @@ class JavaParser
     val cu = this.getComplationUnit(filePath, granularity)
     this.getTokens(cu)
   }
-  def getMethodCall(cu:CompilationUnit) =
-    cu.findAll(classOf[MethodCallExpr])
-      .stream()
-      .collect(Collectors.toList[MethodCallExpr]())
-      .toList
-
-  def getMethodDecl(cu:CompilationUnit) =
-    cu.findAll(classOf[MethodDeclaration])
-      .stream()
-      .collect(Collectors.toList[MethodDeclaration]())
-      .toList
-
-  def getMethodRef(cu:CompilationUnit) =
-    cu.findAll(classOf[MethodReferenceExpr])
-      .stream()
-      .collect(Collectors.toList[MethodReferenceExpr]())
-      .toList
-
-  def getTypes(cu:CompilationUnit) =
-    cu.findAll(classOf[Type])
-      .stream()
-      .collect(Collectors.toList[Type]())
-      .toList
-
-  def getSimpleName(cu:CompilationUnit) =
-    cu.findAll(classOf[SimpleName])
-      .stream()
-      .collect(Collectors.toList[SimpleName]())
-      .toList
-
-
-  def addPosition(cu:CompilationUnit) = {
-    val ctx = new utils.Context
-    val tree = addPositionVisitor(ctx)
-    tree.visitBreadthFirst(cu)
-  }
-
-  def addPositionWithGenCode(cu:CompilationUnit) = {
-    val ctx = new utils.Context
-    cu.genCode(ctx)
-    println(ctx.get_buggy_abstract)
-  }
 
 }
 
@@ -112,8 +69,8 @@ object JavaParser extends JavaParser {
 //    println("*******************Method Call*************************")
 //    getMethodCall(cu).foreach(println _)
 //
-//    println("******************All Types**************************")
-//    getTypes(cu).foreach(println _)
+    println("******************All Types**************************")
+    getTypes(cu).foreach(println _)
 //
 //    println("******************Method Reference**************************")
 //    getMethodRef(cu).foreach(println _)
@@ -128,6 +85,7 @@ object JavaParser extends JavaParser {
 
     printAST("./log/UnionMain.Yaml", cu)
 
+    println("******************All Gen Code **************************")
     addPositionWithGenCode(cu)
   }
 }

@@ -4,10 +4,10 @@ package tree
 import scala.collection.JavaConversions._
 import com.github.javaparser.ast.body._
 import com.github.javaparser.ast._
-import utils.{Common, Context}
+import utils.{Context}
 
 
-trait EnrichedTrees extends Common with _Statement{
+trait EnrichedTrees extends _Statement{
 
 
   implicit class addPosition(node:Node) {

@@ -2,7 +2,7 @@ package org.ucf.ml
 package tree
 
 import com.github.javaparser.ast.body.{Parameter, VariableDeclarator}
-import utils.{Common, Context}
+import utils.{Context}
 import com.github.javaparser.ast.expr._
 
 import scala.collection.JavaConversions._
@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 trait _Expression extends _Share {
 
   /******************************* Expression ********************************/
-  implicit class gen(node:Expression){
+  implicit class genExpression(node:Expression){
     def genCode(ctx:Context):String = {
       node match {
         case expr:ArrayAccessExpr  => expr.genCode(ctx)
@@ -29,10 +29,7 @@ trait _Expression extends _Share {
         case expr:EnclosedExpr  => expr.genCode(ctx)
         case expr:VariableDeclarationExpr  => expr.genCode(ctx)
         case expr:SwitchExpr  => expr.genCode(ctx)
-
-
         case expr:LiteralExpr => expr.genCode(ctx)
-
         case expr:ObjectCreationExpr  => expr.genCode(ctx)
         case expr:SuperExpr  => expr.genCode(ctx)
         case expr:UnaryExpr  => expr.genCode(ctx)
@@ -74,7 +71,6 @@ trait _Expression extends _Share {
     }
   }
 
-
   implicit class genConditionalExpr(node:ConditionalExpr) {
     def genCode(ctx:Context):String = {
       EMPTY_STRING
@@ -100,27 +96,15 @@ trait _Expression extends _Share {
       })
       ctx.append(")")
 
-      if (node.getParentNode.isPresent){
-        val pa = node.getParentNode.get()
-        if (!pa.isInstanceOf[Expression]){
-          ctx.append(";")
-          ctx.append("\n")
-        }
-      }
-
-
       EMPTY_STRING
     }
   }
-
 
   implicit class genAnnotationExpr(node:AnnotationExpr) {
     def genCode(ctx:Context):String = {
       EMPTY_STRING
     }
   }
-
-
 
   implicit class genAssignExpr(node:AssignExpr) {
     def genCode(ctx:Context):String= {
@@ -134,13 +118,9 @@ trait _Expression extends _Share {
 
       right.genCode(ctx)
 
-      ctx.append(";")
-      ctx.append("\n")
-
       EMPTY_STRING
     }
   }
-
 
   implicit class genInstanceOfExpr(node:InstanceOfExpr) {
     def genCode(ctx:Context):String = {
@@ -148,13 +128,11 @@ trait _Expression extends _Share {
     }
   }
 
-
   implicit class genThisExpr(node:ThisExpr) {
     def genCode(ctx:Context):String = {
       EMPTY_STRING
     }
   }
-
 
   implicit class genNameExpr(node:NameExpr) {
     def genCode(ctx:Context):String = {
@@ -169,21 +147,17 @@ trait _Expression extends _Share {
     }
   }
 
-
   implicit class genMethodReferenceExpr(node:MethodReferenceExpr) {
     def genCode(ctx:Context):String = {
       EMPTY_STRING
     }
   }
 
-
-
   implicit class genEnclosedExpr(node:EnclosedExpr) {
     def genCode(ctx:Context):String= {
       EMPTY_STRING
     }
   }
-
 
   implicit class genVariableDeclarationExpr(node:VariableDeclarationExpr) {
     def genCode(ctx:Context):String = {
@@ -193,7 +167,6 @@ trait _Expression extends _Share {
       EMPTY_STRING
     }
   }
-
 
   implicit class genSwitchExpr(node:SwitchExpr) {
     def genCode(ctx:Context):String = {
@@ -205,12 +178,8 @@ trait _Expression extends _Share {
   implicit class genLiteralExpr(node:LiteralExpr) {
     def genCode(ctx:Context):String = {
       node match {
-        case expr:NullLiteralExpr => {
-          ctx.append("null")
-        }
-        case expr:BooleanLiteralExpr => {
-          ctx.append(expr.getValue.toString)
-        }
+        case expr:NullLiteralExpr => ctx.append(expr.toString)
+        case expr:BooleanLiteralExpr => ctx.append(expr.getValue.toString)
         case expr:LiteralStringValueExpr  => expr.genCode(ctx)
       }
       EMPTY_STRING
@@ -220,13 +189,20 @@ trait _Expression extends _Share {
   implicit class genLiteralStringValueExpr(node:LiteralStringValueExpr) {
     def genCode(ctx:Context):String = {
       node match {
-        case expr: CharLiteralExpr => {expr.genCode(ctx)}
-        case expr: LongLiteralExpr => {expr.genCode(ctx)}
-        case expr: DoubleLiteralExpr => {expr.genCode(ctx)}
-        case expr: StringLiteralExpr => {expr.genCode(ctx)}
-        case expr: IntegerLiteralExpr => {expr.genCode(ctx)}
-        case expr: TextBlockLiteralExpr => {expr.genCode(ctx)}
+        case expr: TextBlockLiteralExpr => expr.genCode(ctx)
+        case expr: CharLiteralExpr => expr.genCode(ctx)
+        case expr: DoubleLiteralExpr => expr.genCode(ctx)
+        case expr: LongLiteralExpr => expr.genCode(ctx)
+        case expr: StringLiteralExpr => expr.genCode(ctx)
+        case expr: IntegerLiteralExpr => expr.genCode(ctx)
       }
+      EMPTY_STRING
+    }
+  }
+
+  implicit class genTextBlockLiteralExpr(node:TextBlockLiteralExpr) {
+    def genCode(ctx:Context):String = {
+      ctx.append(node.getValue)
       EMPTY_STRING
     }
   }
@@ -238,14 +214,14 @@ trait _Expression extends _Share {
     }
   }
 
-  implicit class genLongLiteralExpr(node:LongLiteralExpr) {
+  implicit class genDoubleLiteralExpr(node:DoubleLiteralExpr) {
     def genCode(ctx:Context):String = {
       ctx.append(node.getValue)
       EMPTY_STRING
     }
   }
 
-  implicit class genDoubleLiteralExpr(node:DoubleLiteralExpr) {
+  implicit class genLongLiteralExpr(node:LongLiteralExpr) {
     def genCode(ctx:Context):String = {
       ctx.append(node.getValue)
       EMPTY_STRING
@@ -266,12 +242,7 @@ trait _Expression extends _Share {
     }
   }
 
-  implicit class genTextBlockLiteralExpr(node:TextBlockLiteralExpr) {
-    def genCode(ctx:Context):String = {
-      ctx.append(node.getValue)
-      EMPTY_STRING
-    }
-  }
+
 
 
 
@@ -359,8 +330,6 @@ trait _Expression extends _Share {
         ctx.append("=")
         init.get().genCode(ctx)
       }
-      ctx.append(";")
-      ctx.append("\n")
 
       EMPTY_STRING
     }

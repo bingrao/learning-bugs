@@ -3,7 +3,6 @@ package org.ucf.ml.utils
 import java.io.{FileWriter, PrintWriter}
 
 trait Common {
-  import scala.collection.JavaConversions._
   final val EMPTY_STRING = ""
   val logger = new Logging(this.getClass.getName)
 

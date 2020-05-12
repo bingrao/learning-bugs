@@ -1,12 +1,12 @@
 public class DummyClass {
 
-    private void success(io.netty.channel.Channel channel) {
+    private void success(io.netty.channel.Channel channel, int input) {
         org.mycat.netty.mysql.MySQLHandshakeHandler.logger.info("success info return form MySQLHandshakeHandler");
         io.netty.buffer.ByteBuf out = channel.alloc().buffer();
         org.mycat.netty.mysql.OK ok = new org.mycat.netty.mysql.OK();
         ok.sequenceId = 2;
         ok.setStatusFlag(Flags.SERVER_STATUS_AUTOCOMMIT);
-        out.writeBytes(ok.toPacket());
+        out.writeBytes(ok.toPacket(), input);
         channel.writeAndFlush(out);
     }
 }
@@ -149,6 +149,9 @@ root(Type=CompilationUnit):
                                             scope(Type=NameExpr): 
                                                 name(Type=SimpleName): 
                                                     identifier: "ok"
+                                        - argument(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "input"
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
@@ -183,6 +186,12 @@ root(Type=CompilationUnit):
                                         scope(Type=ClassOrInterfaceType): 
                                             name(Type=SimpleName): 
                                                 identifier: "io"
+                        - parameter(Type=Parameter): 
+                            isVarArgs: "false"
+                            name(Type=SimpleName): 
+                                identifier: "input"
+                            type(Type=PrimitiveType): 
+                                type: "INT"
             modifiers: 
                 - modifier(Type=Modifier): 
                     keyword: "PUBLIC"

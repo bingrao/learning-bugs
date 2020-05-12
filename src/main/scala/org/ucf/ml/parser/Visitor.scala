@@ -1,14 +1,20 @@
 package org.ucf.ml
 package parser
 
-import com.github.javaparser.ast.body.{ClassOrInterfaceDeclaration, MethodDeclaration}
-import com.github.javaparser.ast.visitor.{TreeVisitor, VoidVisitorAdapter}
 
+import com.github.javaparser.ast.body.{ClassOrInterfaceDeclaration}
+import com.github.javaparser.ast.visitor.{TreeVisitor, VoidVisitorAdapter}
 import scala.collection.mutable.ListBuffer
 import com.github.javaparser.ast.{Node, PackageDeclaration}
-import org.ucf.ml.tree.EnrichedTrees
+import com.github.javaparser.ast.`type`.Type
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.{MethodCallExpr, MethodReferenceExpr, SimpleName}
+import scala.collection.JavaConversions._
+import java.util.stream.Collectors
+import tree.EnrichedTrees
 
-trait Visitor extends utils.Common with EnrichedTrees {
+trait Visitor extends EnrichedTrees {
 
   case class MethodNameCollector() extends VoidVisitorAdapter[ListBuffer[String]] {
     override def visit(md:MethodDeclaration, c:ListBuffer[String]): Unit = {
@@ -17,7 +23,7 @@ trait Visitor extends utils.Common with EnrichedTrees {
     }
   }
 
-
+  @deprecated
   case class addPositionVisitor(ctx:utils.Context) extends TreeVisitor {
     override def process(node: Node): Unit = {
       node match {
@@ -35,4 +41,46 @@ trait Visitor extends utils.Common with EnrichedTrees {
     }
   }
 
+  def getMethodCall(cu:CompilationUnit) =
+    cu.findAll(classOf[MethodCallExpr])
+      .stream()
+      .collect(Collectors.toList[MethodCallExpr]())
+      .toList
+
+  def getMethodDecl(cu:CompilationUnit) =
+    cu.findAll(classOf[MethodDeclaration])
+      .stream()
+      .collect(Collectors.toList[MethodDeclaration]())
+      .toList
+
+  def getMethodRef(cu:CompilationUnit) =
+    cu.findAll(classOf[MethodReferenceExpr])
+      .stream()
+      .collect(Collectors.toList[MethodReferenceExpr]())
+      .toList
+
+  def getTypes(cu:CompilationUnit) =
+    cu.findAll(classOf[Type])
+      .stream()
+      .collect(Collectors.toList[Type]())
+      .toList
+
+  def getSimpleName(cu:CompilationUnit) =
+    cu.findAll(classOf[SimpleName])
+      .stream()
+      .collect(Collectors.toList[SimpleName]())
+      .toList
+
+  @deprecated
+  def addPosition(cu:CompilationUnit) = {
+    val ctx = new utils.Context
+    val tree = addPositionVisitor(ctx)
+    tree.visitBreadthFirst(cu)
+  }
+
+  def addPositionWithGenCode(cu:CompilationUnit) = {
+    val ctx = new utils.Context
+    cu.genCode(ctx)
+    println(ctx.get_buggy_abstract)
+  }
 }

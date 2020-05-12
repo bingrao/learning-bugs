@@ -60,6 +60,8 @@ trait _Statement extends _Expression {
   implicit class genExpressionStmt(node:ExpressionStmt) {
     def genCode(ctx:Context):String  = {
       node.getExpression.genCode(ctx)
+      ctx.append(";")
+      ctx.append("\n")
       EMPTY_STRING
     }
   }
