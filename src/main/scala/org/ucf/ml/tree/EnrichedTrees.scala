@@ -78,7 +78,8 @@ trait EnrichedTrees extends _Statement{
       val modifiers = node.getModifiers.toList
       modifiers.foreach(modifier => modifier.genCode(ctx))
       // 2. Class Name
-      node.getName.genCode(ctx)
+//      node.getName.genCode(ctx)
+      ctx.append(ctx.type_maps.getNewContent(node.getNameAsString))
 
       ctx.append("{")
       ctx.appendNewLine()

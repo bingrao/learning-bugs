@@ -11,10 +11,10 @@ class Count[K, V <: String](name:String, idioms:mutable.HashSet[String]) extends
   private val prefix = f"${name}_"
 
   def getPrefix = this.prefix
-  def getNewValue = (f"${name}_${this.getIncCount}").asInstanceOf[V]
+  private def getNewValue = (f"${name}_${this.getIncCount}").asInstanceOf[V]
 
-  def getIncCount = offset.getAndIncrement()
-  def getDecCount = offset.getAndDecrement()
+  private def getIncCount = offset.getAndIncrement()
+  private def getDecCount = offset.getAndDecrement()
   def getCurCount = offset.get()
 
   def getKeys = data.keys.toList
@@ -45,7 +45,8 @@ class Count[K, V <: String](name:String, idioms:mutable.HashSet[String]) extends
   }
 
   def dump_data(path:String=null) = if (!data.isEmpty) {
-    val dump = data.map{case (k,v) => f"${name}\t${v}\t${k}"}.mkString("\n")
+    val dump = data.toList.sortBy(_._2.split("_").last.toInt)
+      .map{case (k,v) => f"${name}\t${v}\t${k}"}.mkString("\n")
     if (path != null)
       write(path, dump)
     else

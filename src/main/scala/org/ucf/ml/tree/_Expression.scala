@@ -84,8 +84,9 @@ trait _Expression extends _Share {
       val arguments = node.getArguments.toList
 
       if (scope.isPresent) {
-        val scope_value = ctx.variable_maps.getNewContent(scope.get().toString)
-        ctx.append(scope_value)
+//        val scope_value = ctx.variable_maps.getNewContent(scope.get().toString)
+//        ctx.append(scope_value)
+          scope.get().genCode(ctx)
       }
       ctx.append(".")
 
@@ -139,7 +140,9 @@ trait _Expression extends _Share {
 
   implicit class genNameExpr(node:NameExpr) {
     def genCode(ctx:Context):String = {
-      node.getName.genCode(ctx)
+//      node.getName.genCode(ctx)
+
+      ctx.append(ctx.variable_maps.getNewContent(node.getName.asString()))
       EMPTY_STRING
     }
   }
@@ -238,7 +241,7 @@ trait _Expression extends _Share {
   implicit class genStringLiteralExpr(node:StringLiteralExpr) {
     def genCode(ctx:Context):String = {
       val value = ctx.string_maps.getNewContent(node.getValue)
-      ctx.append("\"" + value + "\"")
+      ctx.append(value)
       EMPTY_STRING
     }
   }
@@ -251,24 +254,24 @@ trait _Expression extends _Share {
     }
   }
 
-
-
-
-
+  /**
+   *  new B().new C();
+   *  scope --> new B()
+   *  type --> new C()
+   * @param node
+   */
   implicit class genObjectCreationExpr(node:ObjectCreationExpr) {
     def genCode(ctx:Context):String = {
       val arguments = node.getArguments.toList
       val scope = node.getScope
       val tp = node.getType
 
-      ctx.append("new")
       if (scope.isPresent) {
-//        scope.get().genCode(ctx)
-//        ctx.append(f"[${scope.get()}]")
-        ctx.append(ctx.variable_maps.getNewContent(scope.get().toString))
-
+        scope.get().genCode(ctx)
         ctx.append(".")
       }
+
+      ctx.append("new")
 
       tp.genCode(ctx)
 
@@ -304,19 +307,17 @@ trait _Expression extends _Share {
 
   implicit class genFieldAccessExpr(node:FieldAccessExpr) {
     def genCode(ctx:Context):String = {
-//      node.getScope.genCode(ctx)
-//      ctx.append(f"[${node.getScope}]")
+
 
       val scope_value = ctx.variable_maps.getNewContent(node.getScope.toString)
       ctx.append(scope_value)
+//      node.getScope.genCode(ctx)
 
       ctx.append(".")
 
-      // method or filed
-
-//      node.getName.genCode(ctx)
-      val method_name = ctx.method_maps.getNewContent(node.getName.asString())
-      ctx.append(method_name)
+      // filed
+      val name = ctx.variable_maps.getNewContent(node.getName.asString())
+      ctx.append(name)
 
 
       EMPTY_STRING

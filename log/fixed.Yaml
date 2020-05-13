@@ -8,6 +8,7 @@ public class DummyClass {
         ok.setStatusFlag(Flags.SERVER_STATUS_AUTOCOMMIT);
         out.writeBytes(ok.toPacket());
         channel.writeAndFlush(out);
+        new B().new C();
     }
 }
 ---
@@ -160,6 +161,15 @@ root(Type=CompilationUnit):
                                         - argument(Type=NameExpr): 
                                             name(Type=SimpleName): 
                                                 identifier: "out"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=ObjectCreationExpr): 
+                                    scope(Type=ObjectCreationExpr): 
+                                        type(Type=ClassOrInterfaceType): 
+                                            name(Type=SimpleName): 
+                                                identifier: "B"
+                                    type(Type=ClassOrInterfaceType): 
+                                        name(Type=SimpleName): 
+                                            identifier: "C"
                     type(Type=VoidType): 
                     name(Type=SimpleName): 
                         identifier: "success"

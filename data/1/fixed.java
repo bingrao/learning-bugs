@@ -6,4 +6,5 @@ private void success(io.netty.channel.Channel channel) {
     ok.setStatusFlag(Flags.SERVER_STATUS_AUTOCOMMIT);
     out.writeBytes(ok.toPacket());
     channel.writeAndFlush(out);
+    new B().new C();
 }
