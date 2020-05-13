@@ -72,15 +72,10 @@ trait Visitor extends EnrichedTrees {
       .toList
 
   @deprecated
-  def addPosition(cu:CompilationUnit) = {
-    val ctx = new utils.Context
+  def addPosition(ctx:utils.Context, cu:CompilationUnit) = {
     val tree = addPositionVisitor(ctx)
     tree.visitBreadthFirst(cu)
   }
 
-  def addPositionWithGenCode(cu:CompilationUnit) = {
-    val ctx = new utils.Context
-    cu.genCode(ctx)
-    println(ctx.get_buggy_abstract)
-  }
+  def addPositionWithGenCode(ctx:utils.Context, cu:CompilationUnit) = cu.genCode(ctx)
 }

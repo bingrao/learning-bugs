@@ -1,6 +1,10 @@
 package org.ucf.ml.utils
 
 import java.io.{FileWriter, PrintWriter}
+import java.nio.file.{Files, Paths}
+import java.util.stream.Collectors
+import scala.collection.mutable
+import scala.collection.JavaConversions._
 
 trait Common {
   final val EMPTY_STRING = ""
@@ -11,4 +15,16 @@ trait Common {
     printWriter.print(context)
     printWriter.close()
   }
+
+  def readIdioms(filePath:String) = {
+    var idioms = new mutable.HashSet[String]()
+    try{
+      val stream = Files.lines(Paths.get(filePath))
+      idioms.++=(stream.collect(Collectors.toSet[String]()))
+    } catch {
+      case e:Exception => e.printStackTrace()
+    }
+    idioms
+  }
+
 }

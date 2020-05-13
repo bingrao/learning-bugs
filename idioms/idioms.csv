@@ -270,3 +270,5 @@ writer
 writer.write
 x
 y
+void
+int

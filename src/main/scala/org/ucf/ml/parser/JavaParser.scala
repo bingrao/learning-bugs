@@ -1,19 +1,12 @@
 package org.ucf.ml
 package parser
 
-import com.github.javaparser.ast.`type`.Type
+
 import com.github.javaparser.{JavaToken, StaticJavaParser}
 import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.expr.{MethodCallExpr, MethodReferenceExpr, SimpleName}
 import scala.collection.JavaConversions._
-import java.util.stream.Collectors
 
 class JavaParser extends Visitor  {
-
-  private val ctx = new utils.Context
-  def getContext = this.ctx
-
 
   /**
    * printAST("./log/UnionMain.Yaml", cu)
@@ -63,29 +56,29 @@ object JavaParser extends JavaParser {
     /**
      * https://javaparser.org/inspecting-an-ast/
      */
-    val cu = getComplationUnit("data/1/fixed.java", "method")
+    val ctx = new utils.Context
 
-//    printAST(cu = cu)
-//    println("*******************Method Call*************************")
-//    getMethodCall(cu).foreach(println _)
-//
-    println("******************All Types**************************")
-    getTypes(cu).foreach(println _)
-//
-//    println("******************Method Reference**************************")
-//    getMethodRef(cu).foreach(println _)
-//
-//
-//    println("******************Simple Name**************************")
-//    getSimpleName(cu).foreach(println _)
-//
-//
-//    println("******************Add Position**************************")
-//    addPosition(cu)
+    println("******************Buggy Gen Code **************************")
+    ctx.setCurrentTarget("buggy")
+    val cu_buggy = getComplationUnit("data/1/buggy.java", "method")
+    printAST("./log/buggy.Yaml", cu_buggy)
+    addPositionWithGenCode(ctx, cu_buggy)
+    println(ctx.get_buggy_abstract)
 
-    printAST("./log/UnionMain.Yaml", cu)
 
-    println("******************All Gen Code **************************")
-    addPositionWithGenCode(cu)
+    println("******************Fixed Gen Code **************************")
+    ctx.setCurrentTarget("fixed")
+    val cu_fixed = getComplationUnit("data/1/fixed.java", "method")
+    printAST("./log/fixed.Yaml", cu_fixed)
+    addPositionWithGenCode(ctx, cu_fixed)
+    println(ctx.get_fixed_abstract)
+
+
+
+
+
+
+
+    ctx.dumpy_mapping()
   }
 }

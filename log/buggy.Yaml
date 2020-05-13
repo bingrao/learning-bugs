@@ -1,12 +1,12 @@
 public class DummyClass {
 
-    private void success(io.netty.channel.Channel channel, int input) {
-        org.mycat.netty.mysql.MySQLHandshakeHandler.logger.info("success info return form MySQLHandshakeHandler");
+    private void success(io.netty.channel.Channel channel) {
+        org.mycat.netty.mysql.MySQLHandshakeHandler.logger.debug("success info return form MySQLHandshakeHandler");
         io.netty.buffer.ByteBuf out = channel.alloc().buffer();
         org.mycat.netty.mysql.OK ok = new org.mycat.netty.mysql.OK();
         ok.sequenceId = 2;
         ok.setStatusFlag(Flags.SERVER_STATUS_AUTOCOMMIT);
-        out.writeBytes(ok.toPacket(), input);
+        out.writeBytes(ok.toPacket());
         channel.writeAndFlush(out);
     }
 }
@@ -24,7 +24,7 @@ root(Type=CompilationUnit):
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
-                                        identifier: "info"
+                                        identifier: "debug"
                                     scope(Type=FieldAccessExpr): 
                                         name(Type=SimpleName): 
                                             identifier: "logger"
@@ -149,9 +149,6 @@ root(Type=CompilationUnit):
                                             scope(Type=NameExpr): 
                                                 name(Type=SimpleName): 
                                                     identifier: "ok"
-                                        - argument(Type=NameExpr): 
-                                            name(Type=SimpleName): 
-                                                identifier: "input"
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
@@ -186,12 +183,6 @@ root(Type=CompilationUnit):
                                         scope(Type=ClassOrInterfaceType): 
                                             name(Type=SimpleName): 
                                                 identifier: "io"
-                        - parameter(Type=Parameter): 
-                            isVarArgs: "false"
-                            name(Type=SimpleName): 
-                                identifier: "input"
-                            type(Type=PrimitiveType): 
-                                type: "INT"
             modifiers: 
                 - modifier(Type=Modifier): 
                     keyword: "PUBLIC"

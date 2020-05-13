@@ -1,8 +1,8 @@
 package org.ucf.ml
 package tree
 
-import com.github.javaparser.ast.body.{Parameter, VariableDeclarator}
-import utils.{Context}
+import com.github.javaparser.ast.body.{VariableDeclarator}
+import utils.Context
 import com.github.javaparser.ast.expr._
 
 import scala.collection.JavaConversions._
@@ -83,11 +83,14 @@ trait _Expression extends _Share {
       val scope = node.getScope
       val arguments = node.getArguments.toList
 
-      if (scope.isPresent) scope.get().genCode(ctx)
-
+      if (scope.isPresent) {
+        val scope_value = ctx.variable_maps.getNewContent(scope.get().toString)
+        ctx.append(scope_value)
+      }
       ctx.append(".")
 
-      node.getName.genCode(ctx)
+      val funcName = ctx.method_maps.getNewContent(node.getName.asString())
+      ctx.append(funcName)
 
       ctx.append("(")
       arguments.foreach(expr => {
@@ -202,42 +205,48 @@ trait _Expression extends _Share {
 
   implicit class genTextBlockLiteralExpr(node:TextBlockLiteralExpr) {
     def genCode(ctx:Context):String = {
-      ctx.append(node.getValue)
+      val value = ctx.textBlock_maps.getNewContent(node.getValue)
+      ctx.append(value)
       EMPTY_STRING
     }
   }
 
   implicit class genCharLiteralExpr(node:CharLiteralExpr) {
     def genCode(ctx:Context):String = {
-      ctx.append(node.getValue)
+      val value = ctx.char_maps.getNewContent(node.getValue)
+      ctx.append(value)
       EMPTY_STRING
     }
   }
 
   implicit class genDoubleLiteralExpr(node:DoubleLiteralExpr) {
     def genCode(ctx:Context):String = {
-      ctx.append(node.getValue)
+      val value = ctx.double_maps.getNewContent(node.getValue)
+      ctx.append(value)
       EMPTY_STRING
     }
   }
 
   implicit class genLongLiteralExpr(node:LongLiteralExpr) {
     def genCode(ctx:Context):String = {
-      ctx.append(node.getValue)
+      val value = ctx.long_maps.getNewContent(node.getValue)
+      ctx.append(value)
       EMPTY_STRING
     }
   }
 
   implicit class genStringLiteralExpr(node:StringLiteralExpr) {
     def genCode(ctx:Context):String = {
-      ctx.append(node.getValue)
+      val value = ctx.string_maps.getNewContent(node.getValue)
+      ctx.append("\"" + value + "\"")
       EMPTY_STRING
     }
   }
 
   implicit class genIntegerLiteralExpr(node:IntegerLiteralExpr) {
     def genCode(ctx:Context):String = {
-      ctx.append(node.getValue)
+      val value = ctx.int_maps.getNewContent(node.getValue)
+      ctx.append(value)
       EMPTY_STRING
     }
   }
@@ -254,7 +263,10 @@ trait _Expression extends _Share {
 
       ctx.append("new")
       if (scope.isPresent) {
-        scope.get().genCode(ctx)
+//        scope.get().genCode(ctx)
+//        ctx.append(f"[${scope.get()}]")
+        ctx.append(ctx.variable_maps.getNewContent(scope.get().toString))
+
         ctx.append(".")
       }
 
@@ -292,11 +304,20 @@ trait _Expression extends _Share {
 
   implicit class genFieldAccessExpr(node:FieldAccessExpr) {
     def genCode(ctx:Context):String = {
-      node.getScope.genCode(ctx)
+//      node.getScope.genCode(ctx)
+//      ctx.append(f"[${node.getScope}]")
+
+      val scope_value = ctx.variable_maps.getNewContent(node.getScope.toString)
+      ctx.append(scope_value)
 
       ctx.append(".")
 
-      node.getName.genCode(ctx)
+      // method or filed
+
+//      node.getName.genCode(ctx)
+      val method_name = ctx.method_maps.getNewContent(node.getName.asString())
+      ctx.append(method_name)
+
 
       EMPTY_STRING
     }
@@ -315,8 +336,7 @@ trait _Expression extends _Share {
     }
   }
 
-
-
+  /******************************* Variable ********************************/
   implicit class genVariableDeclarator(node: VariableDeclarator) {
     def genCode(ctx:Context):String = {
       val tp = node.getType
@@ -324,15 +344,15 @@ trait _Expression extends _Share {
       val init = node.getInitializer
 
       tp.genCode(ctx)
-      name.genCode(ctx)
+
+//      name.genCode(ctx)
+      ctx.append(ctx.variable_maps.getNewContent(name.asString()))
 
       if (init.isPresent){
         ctx.append("=")
         init.get().genCode(ctx)
       }
-
       EMPTY_STRING
     }
   }
-
 }

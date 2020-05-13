@@ -3,7 +3,7 @@ package tree
 
 import scala.collection.JavaConversions._
 import com.github.javaparser.ast.stmt._
-import utils.{Context}
+import utils.Context
 
 
 
@@ -61,7 +61,7 @@ trait _Statement extends _Expression {
     def genCode(ctx:Context):String  = {
       node.getExpression.genCode(ctx)
       ctx.append(";")
-      ctx.append("\n")
+      ctx.appendNewLine()
       EMPTY_STRING
     }
   }
@@ -165,10 +165,10 @@ trait _Statement extends _Expression {
   implicit class genBlockStmt(node:BlockStmt) {
     def genCode(ctx:Context):String  = {
       ctx.append("{")
-      ctx.append("\n")
+      ctx.appendNewLine()
       node.getStatements.toList.foreach(sts => sts.genCode(ctx))
       ctx.append("}")
-      ctx.append("\n")
+      ctx.appendNewLine()
       EMPTY_STRING
     }
   }
