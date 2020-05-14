@@ -15,7 +15,7 @@ class Count[K, V <: String](name:String, idioms:mutable.HashSet[String]) extends
 
   private def getIncCount = offset.getAndIncrement()
   private def getDecCount = offset.getAndDecrement()
-  def getCurCount = offset.get()
+  def getCurCount = offset
 
   def getKeys = data.keys.toList
   def getValues = data.map(_._2).toList
@@ -26,17 +26,17 @@ class Count[K, V <: String](name:String, idioms:mutable.HashSet[String]) extends
     data.+=(key -> value)
   }
   def update(key:K, value:V) = data(key) = value
-  def remove(key:K) = {
-    data -= key
-  }
+  def remove(key:K) = data -= key
   def contain(key:K) = data.contains(key)
 
 
   def getNewContent(key:K) = {
     if (idioms.contains(key.toString))
+      // the key is a idiom
       key.asInstanceOf[V]
     else if (this.contain(key)){
-        this.get(key).get
+      // If there exists
+      this.get(key).get
     } else {
       val value = this.getNewValue
       this.add(key, value)

@@ -4,8 +4,9 @@ package tree
 import com.github.javaparser.ast._
 import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.body.Parameter
-import com.github.javaparser.ast.expr.{SimpleName, Name}
+import com.github.javaparser.ast.expr.{FieldAccessExpr, MethodCallExpr, Name, SimpleName}
 import utils.Common
+
 import scala.collection.JavaConversions._
 trait _Node extends Common {
 
@@ -154,8 +155,27 @@ trait _Node extends Common {
       ctx.append(name)
 
     }
+  }
 
+  def expand_scope(ctx:Context, scope:Node):Unit = {
+    scope match {
+      case expr: MethodCallExpr => {
+        val expr_name = expr.getName
+        val expr_scope = expr.getScope
 
+        // method name
+        ctx.method_maps.getNewContent(expr_name.asString())
+
+        if (expr_scope.isPresent) expand_scope(ctx, expr_scope.get())
+      }
+      case tp:ClassOrInterfaceType => {
+        val tp_name = tp.getName
+        val tp_scope = tp.getScope
+        if (tp_scope.isPresent) expand_scope(ctx, tp_scope.get())
+      }
+      case fd:FieldAccessExpr => {}
+      case _ =>{}
+    }
   }
 
 }

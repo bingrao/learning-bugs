@@ -6,9 +6,10 @@ import com.github.javaparser.{JavaToken, StaticJavaParser}
 import com.github.javaparser.ast.CompilationUnit
 import scala.collection.JavaConversions._
 
-class JavaParser(ctx:Context) extends Visitor  {
+class JavaParser extends Visitor  {
 
   /**
+   * https://javaparser.org/inspecting-an-ast/
    * printAST("./log/UnionMain.Yaml", cu)
    * printAST("./log/UnionMain.Xml", cu, "xml")
    * printAST("./log/UnionMain.dot", cu, "dot")

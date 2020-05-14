@@ -8,16 +8,14 @@ abstract class Granularity extends utils.Common {
   protected def readSourceCode(input:String) = {
     val reg:String = try {
       if(Files.exists(Paths.get(input))){
-        logger.debug(f"This input File Path: ${input}")
         new String(Files.readAllBytes(Paths.get(input)))
       } else {
-        logger.debug("The input is a string source code")
         input
       }
     } catch {
       case e:IOException => {
         e.printStackTrace()
-        EMPTY_STRING
+        EmptyString
       }
     }
     // Remove all comments and anotations in the source code

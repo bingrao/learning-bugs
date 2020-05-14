@@ -1,49 +1,54 @@
 package org.ucf.ml
 
+import java.nio.file.{Files, Paths}
 import java.util.concurrent.atomic.AtomicInteger
-
-import com.github.javaparser.ast.Node
-import com.github.javaparser.ast.`type`.ClassOrInterfaceType
-import com.github.javaparser.ast.expr.{FieldAccessExpr, MethodCallExpr}
+import java.util.stream.Collectors
 import org.ucf.ml.utils.{Common, Count}
+import scala.collection.mutable
+import java.nio.file.{Files, Paths}
+import java.util.stream.Collectors
+import scala.collection.mutable
+import scala.collection.JavaConversions._
 
-class Context extends Common {
+
+class Context(idioms:mutable.HashSet[String]) extends Common {
+
   private val position_offset = new AtomicInteger()
   def getNewPosition = position_offset.getAndIncrement()
-  def getCurrentPositionOffset = position_offset.get()
+  def getCurrentPositionOffset = position_offset
 
-  private var current_target = "buggy"
-  def getCurrentTarget = this.current_target
-  def setCurrentTarget(target:String) = {
-    this.current_target = target
+  // Current work mode
+  private var current_mode = SOURCE
+  def getCurrentMode = this.current_mode
+  def setCurrentMode(target:Value) = {
     this.position_offset.set(0)
+    this.current_mode = target
   }
 
   private val buggy_abstract = new StringBuilder()
   private val fixed_abstract = new StringBuilder()
 
-  def isAddPostion = true
+  def isAddPostion = false
 
   def attachePosition(content:String) = if (isAddPostion) f"${content}#${this.getNewPosition} " else f"${content} "
 
-  def append(content:String) = this.getCurrentTarget match {
-    case "buggy" => this.buggy_abstract.append(attachePosition(content))
-    case "fixed" => this.fixed_abstract.append(attachePosition(content))
+  def append(content:String) = this.getCurrentMode match {
+    case SOURCE => this.buggy_abstract.append(attachePosition(content))
+    case TARGET => this.fixed_abstract.append(attachePosition(content))
   }
 
-  def isNewLine = true
-  def appendNewLine(level:Int=0):Unit = this.getCurrentTarget match {
-    case "buggy" => if (isNewLine) this.buggy_abstract.append("\n")
-    case "fixed" => if (isNewLine) this.fixed_abstract.append("\n")
+  def isNewLine = false
+  def appendNewLine(level:Int=0):Unit = this.getCurrentMode match {
+    case SOURCE => if (isNewLine) this.buggy_abstract.append("\n")
+    case TARGET => if (isNewLine) this.fixed_abstract.append("\n")
   }
 
   def get_buggy_abstract = buggy_abstract.toString()
   def get_fixed_abstract = fixed_abstract.toString()
 
 
-
-  /*************************** set up and look up idioms ****************************/
-  private val idioms = readIdioms("idioms/idioms.csv")
+  ///////////////////////////////////////////////////////////////////////////////////////
+  /********************* set up and look up statistical data ***************************/
 
   val ident_maps = new Count[String, String]("Ident", idioms)
   val textBlock_maps = new Count[String, String]("text", idioms)
@@ -59,6 +64,8 @@ class Context extends Common {
   val variable_maps = new Count[String, String]("Varl", idioms)
 
 
+  ///////////////////////////////////////////////////////////////////////////////////////
+  /***************************** Helper functions *************************************/
   def dumpy_mapping(path:String=null) = {
     ident_maps.dump_data(path)
     textBlock_maps.dump_data(path)
@@ -73,31 +80,12 @@ class Context extends Common {
     variable_maps.dump_data(path)
   }
 
-  def expand_scope(ctx:Context, scope:Node):Unit = {
-    scope match {
-      case expr: MethodCallExpr => {
-        val expr_name = expr.getName
-        val expr_scope = expr.getScope
+  def clear = {
 
-        // method name
-        ctx.method_maps.getNewContent(expr_name.asString())
-
-        if (expr_scope.isPresent) expand_scope(ctx, expr_scope.get())
-      }
-      case tp:ClassOrInterfaceType => {
-        val tp_name = tp.getName
-        val tp_scope = tp.getScope
-        if (tp_scope.isPresent) expand_scope(ctx, tp_scope.get())
-      }
-      case fd:FieldAccessExpr => {}
-      case _ =>{}
-    }
-  }
-
-  def clear_context = {
     this.position_offset.set(0)
-    this.buggy_abstract.clear()
-    this.fixed_abstract.clear()
+
+    this.buggy_abstract.append("\n")
+    this.fixed_abstract.append("\n")
 
     this.ident_maps.clear
     this.textBlock_maps.clear

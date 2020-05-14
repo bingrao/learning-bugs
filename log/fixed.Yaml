@@ -1,257 +1,42 @@
-package org.ucf.ml;
+public class DummyClass {
 
-import scala.Int;
-import java.io.File.*;
-import java.util.Arrays;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-
-public class JavaApp {
-
-    public void hello(String input) {
-        List<String> messages = Arrays.asList("hello", "baeldung", "readers!");
-        messages.forEach(word -> StringUtils.capitalize(word));
-        messages.forEach(StringUtils::capitalize);
-        List<Integer> numbers = Arrays.asList(5, 3, 50, 24, 40, 2, 9, 18);
-        numbers.stream().sorted((a, b) -> a.compareTo(b));
-        numbers.stream().sorted(Integer::compareTo);
+    public static void main(java.lang.String[] a) {
     }
 }
 ---
 root(Type=CompilationUnit): 
-    packageDeclaration(Type=PackageDeclaration): 
-        name(Type=Name): 
-            identifier: "ml"
-            qualifier(Type=Name): 
-                identifier: "ucf"
-                qualifier(Type=Name): 
-                    identifier: "org"
-    imports: 
-        - import(Type=ImportDeclaration): 
-            isAsterisk: "false"
-            isStatic: "false"
-            name(Type=Name): 
-                identifier: "Int"
-                qualifier(Type=Name): 
-                    identifier: "scala"
-        - import(Type=ImportDeclaration): 
-            isAsterisk: "true"
-            isStatic: "false"
-            name(Type=Name): 
-                identifier: "File"
-                qualifier(Type=Name): 
-                    identifier: "io"
-                    qualifier(Type=Name): 
-                        identifier: "java"
-        - import(Type=ImportDeclaration): 
-            isAsterisk: "false"
-            isStatic: "false"
-            name(Type=Name): 
-                identifier: "Arrays"
-                qualifier(Type=Name): 
-                    identifier: "util"
-                    qualifier(Type=Name): 
-                        identifier: "java"
-        - import(Type=ImportDeclaration): 
-            isAsterisk: "false"
-            isStatic: "false"
-            name(Type=Name): 
-                identifier: "List"
-                qualifier(Type=Name): 
-                    identifier: "util"
-                    qualifier(Type=Name): 
-                        identifier: "java"
-        - import(Type=ImportDeclaration): 
-            isAsterisk: "false"
-            isStatic: "false"
-            name(Type=Name): 
-                identifier: "StringUtils"
-                qualifier(Type=Name): 
-                    identifier: "lang3"
-                    qualifier(Type=Name): 
-                        identifier: "commons"
-                        qualifier(Type=Name): 
-                            identifier: "apache"
-                            qualifier(Type=Name): 
-                                identifier: "org"
     types: 
         - type(Type=ClassOrInterfaceDeclaration): 
             isInterface: "false"
             name(Type=SimpleName): 
-                identifier: "JavaApp"
+                identifier: "DummyClass"
             members: 
                 - member(Type=MethodDeclaration): 
                     body(Type=BlockStmt): 
-                        statements: 
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=VariableDeclarationExpr): 
-                                    variables: 
-                                        - variable(Type=VariableDeclarator): 
-                                            initializer(Type=MethodCallExpr): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "asList"
-                                                scope(Type=NameExpr): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "Arrays"
-                                                arguments: 
-                                                    - argument(Type=StringLiteralExpr): 
-                                                        value: "hello"
-                                                    - argument(Type=StringLiteralExpr): 
-                                                        value: "baeldung"
-                                                    - argument(Type=StringLiteralExpr): 
-                                                        value: "readers!"
-                                            name(Type=SimpleName): 
-                                                identifier: "messages"
-                                            type(Type=ClassOrInterfaceType): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "List"
-                                                typeArguments: 
-                                                    - typeArgument(Type=ClassOrInterfaceType): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "String"
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=MethodCallExpr): 
-                                    name(Type=SimpleName): 
-                                        identifier: "forEach"
-                                    scope(Type=NameExpr): 
-                                        name(Type=SimpleName): 
-                                            identifier: "messages"
-                                    arguments: 
-                                        - argument(Type=LambdaExpr): 
-                                            isEnclosingParameters: "false"
-                                            body(Type=ExpressionStmt): 
-                                                expression(Type=MethodCallExpr): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "capitalize"
-                                                    scope(Type=NameExpr): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "StringUtils"
-                                                    arguments: 
-                                                        - argument(Type=NameExpr): 
-                                                            name(Type=SimpleName): 
-                                                                identifier: "word"
-                                            parameters: 
-                                                - parameter(Type=Parameter): 
-                                                    isVarArgs: "false"
-                                                    name(Type=SimpleName): 
-                                                        identifier: "word"
-                                                    type(Type=UnknownType): 
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=MethodCallExpr): 
-                                    name(Type=SimpleName): 
-                                        identifier: "forEach"
-                                    scope(Type=NameExpr): 
-                                        name(Type=SimpleName): 
-                                            identifier: "messages"
-                                    arguments: 
-                                        - argument(Type=MethodReferenceExpr): 
-                                            identifier: "capitalize"
-                                            scope(Type=TypeExpr): 
-                                                type(Type=ClassOrInterfaceType): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "StringUtils"
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=VariableDeclarationExpr): 
-                                    variables: 
-                                        - variable(Type=VariableDeclarator): 
-                                            initializer(Type=MethodCallExpr): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "asList"
-                                                scope(Type=NameExpr): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "Arrays"
-                                                arguments: 
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "5"
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "3"
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "50"
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "24"
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "40"
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "2"
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "9"
-                                                    - argument(Type=IntegerLiteralExpr): 
-                                                        value: "18"
-                                            name(Type=SimpleName): 
-                                                identifier: "numbers"
-                                            type(Type=ClassOrInterfaceType): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "List"
-                                                typeArguments: 
-                                                    - typeArgument(Type=ClassOrInterfaceType): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "Integer"
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=MethodCallExpr): 
-                                    name(Type=SimpleName): 
-                                        identifier: "sorted"
-                                    scope(Type=MethodCallExpr): 
-                                        name(Type=SimpleName): 
-                                            identifier: "stream"
-                                        scope(Type=NameExpr): 
-                                            name(Type=SimpleName): 
-                                                identifier: "numbers"
-                                    arguments: 
-                                        - argument(Type=LambdaExpr): 
-                                            isEnclosingParameters: "true"
-                                            body(Type=ExpressionStmt): 
-                                                expression(Type=MethodCallExpr): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "compareTo"
-                                                    scope(Type=NameExpr): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "a"
-                                                    arguments: 
-                                                        - argument(Type=NameExpr): 
-                                                            name(Type=SimpleName): 
-                                                                identifier: "b"
-                                            parameters: 
-                                                - parameter(Type=Parameter): 
-                                                    isVarArgs: "false"
-                                                    name(Type=SimpleName): 
-                                                        identifier: "a"
-                                                    type(Type=UnknownType): 
-                                                - parameter(Type=Parameter): 
-                                                    isVarArgs: "false"
-                                                    name(Type=SimpleName): 
-                                                        identifier: "b"
-                                                    type(Type=UnknownType): 
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=MethodCallExpr): 
-                                    name(Type=SimpleName): 
-                                        identifier: "sorted"
-                                    scope(Type=MethodCallExpr): 
-                                        name(Type=SimpleName): 
-                                            identifier: "stream"
-                                        scope(Type=NameExpr): 
-                                            name(Type=SimpleName): 
-                                                identifier: "numbers"
-                                    arguments: 
-                                        - argument(Type=MethodReferenceExpr): 
-                                            identifier: "compareTo"
-                                            scope(Type=TypeExpr): 
-                                                type(Type=ClassOrInterfaceType): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "Integer"
                     type(Type=VoidType): 
                     name(Type=SimpleName): 
-                        identifier: "hello"
+                        identifier: "main"
                     modifiers: 
                         - modifier(Type=Modifier): 
                             keyword: "PUBLIC"
+                        - modifier(Type=Modifier): 
+                            keyword: "STATIC"
                     parameters: 
                         - parameter(Type=Parameter): 
                             isVarArgs: "false"
                             name(Type=SimpleName): 
-                                identifier: "input"
-                            type(Type=ClassOrInterfaceType): 
-                                name(Type=SimpleName): 
-                                    identifier: "String"
+                                identifier: "a"
+                            type(Type=ArrayType): 
+                                origin: "TYPE"
+                                componentType(Type=ClassOrInterfaceType): 
+                                    name(Type=SimpleName): 
+                                        identifier: "String"
+                                    scope(Type=ClassOrInterfaceType): 
+                                        name(Type=SimpleName): 
+                                            identifier: "lang"
+                                        scope(Type=ClassOrInterfaceType): 
+                                            name(Type=SimpleName): 
+                                                identifier: "java"
             modifiers: 
                 - modifier(Type=Modifier): 
                     keyword: "PUBLIC"

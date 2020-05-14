@@ -1,13 +1,11 @@
 public class DummyClass {
 
-    private void success(io.netty.channel.Channel channel) {
-        org.mycat.netty.mysql.MySQLHandshakeHandler.logger.debug("success info return form MySQLHandshakeHandler");
-        io.netty.buffer.ByteBuf out = channel.alloc().buffer();
-        org.mycat.netty.mysql.OK ok = new org.mycat.netty.mysql.OK();
-        ok.sequenceId = 2;
-        ok.setStatusFlag(Flags.SERVER_STATUS_AUTOCOMMIT);
-        out.writeBytes(ok.toPacket());
-        channel.writeAndFlush(out);
+    public static void main(java.lang.String[] a) {
+        main.DAOTest.TestCineplexDAO();
+        main.DAOTest.TestCinemaDAO();
+        main.DAOTest.TestMovieDAO();
+        main.DAOTest.TestShowTimeDAO();
+        main.DAOTest.TestBookingDAO();
     }
 }
 ---
@@ -24,165 +22,77 @@ root(Type=CompilationUnit):
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
-                                        identifier: "debug"
+                                        identifier: "TestCineplexDAO"
                                     scope(Type=FieldAccessExpr): 
                                         name(Type=SimpleName): 
-                                            identifier: "logger"
-                                        scope(Type=FieldAccessExpr): 
-                                            name(Type=SimpleName): 
-                                                identifier: "MySQLHandshakeHandler"
-                                            scope(Type=FieldAccessExpr): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "mysql"
-                                                scope(Type=FieldAccessExpr): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "netty"
-                                                    scope(Type=FieldAccessExpr): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "mycat"
-                                                        scope(Type=NameExpr): 
-                                                            name(Type=SimpleName): 
-                                                                identifier: "org"
-                                    arguments: 
-                                        - argument(Type=StringLiteralExpr): 
-                                            value: "success info return form MySQLHandshakeHandler"
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=VariableDeclarationExpr): 
-                                    variables: 
-                                        - variable(Type=VariableDeclarator): 
-                                            initializer(Type=MethodCallExpr): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "buffer"
-                                                scope(Type=MethodCallExpr): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "alloc"
-                                                    scope(Type=NameExpr): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "channel"
-                                            name(Type=SimpleName): 
-                                                identifier: "out"
-                                            type(Type=ClassOrInterfaceType): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "ByteBuf"
-                                                scope(Type=ClassOrInterfaceType): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "buffer"
-                                                    scope(Type=ClassOrInterfaceType): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "netty"
-                                                        scope(Type=ClassOrInterfaceType): 
-                                                            name(Type=SimpleName): 
-                                                                identifier: "io"
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=VariableDeclarationExpr): 
-                                    variables: 
-                                        - variable(Type=VariableDeclarator): 
-                                            initializer(Type=ObjectCreationExpr): 
-                                                type(Type=ClassOrInterfaceType): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "OK"
-                                                    scope(Type=ClassOrInterfaceType): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "mysql"
-                                                        scope(Type=ClassOrInterfaceType): 
-                                                            name(Type=SimpleName): 
-                                                                identifier: "netty"
-                                                            scope(Type=ClassOrInterfaceType): 
-                                                                name(Type=SimpleName): 
-                                                                    identifier: "mycat"
-                                                                scope(Type=ClassOrInterfaceType): 
-                                                                    name(Type=SimpleName): 
-                                                                        identifier: "org"
-                                            name(Type=SimpleName): 
-                                                identifier: "ok"
-                                            type(Type=ClassOrInterfaceType): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "OK"
-                                                scope(Type=ClassOrInterfaceType): 
-                                                    name(Type=SimpleName): 
-                                                        identifier: "mysql"
-                                                    scope(Type=ClassOrInterfaceType): 
-                                                        name(Type=SimpleName): 
-                                                            identifier: "netty"
-                                                        scope(Type=ClassOrInterfaceType): 
-                                                            name(Type=SimpleName): 
-                                                                identifier: "mycat"
-                                                            scope(Type=ClassOrInterfaceType): 
-                                                                name(Type=SimpleName): 
-                                                                    identifier: "org"
-                            - statement(Type=ExpressionStmt): 
-                                expression(Type=AssignExpr): 
-                                    operator: "ASSIGN"
-                                    target(Type=FieldAccessExpr): 
-                                        name(Type=SimpleName): 
-                                            identifier: "sequenceId"
+                                            identifier: "DAOTest"
                                         scope(Type=NameExpr): 
                                             name(Type=SimpleName): 
-                                                identifier: "ok"
-                                    value(Type=IntegerLiteralExpr): 
-                                        value: "2"
+                                                identifier: "main"
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
-                                        identifier: "setStatusFlag"
-                                    scope(Type=NameExpr): 
+                                        identifier: "TestCinemaDAO"
+                                    scope(Type=FieldAccessExpr): 
                                         name(Type=SimpleName): 
-                                            identifier: "ok"
-                                    arguments: 
-                                        - argument(Type=FieldAccessExpr): 
+                                            identifier: "DAOTest"
+                                        scope(Type=NameExpr): 
                                             name(Type=SimpleName): 
-                                                identifier: "SERVER_STATUS_AUTOCOMMIT"
-                                            scope(Type=NameExpr): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "Flags"
+                                                identifier: "main"
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
-                                        identifier: "writeBytes"
-                                    scope(Type=NameExpr): 
+                                        identifier: "TestMovieDAO"
+                                    scope(Type=FieldAccessExpr): 
                                         name(Type=SimpleName): 
-                                            identifier: "out"
-                                    arguments: 
-                                        - argument(Type=MethodCallExpr): 
+                                            identifier: "DAOTest"
+                                        scope(Type=NameExpr): 
                                             name(Type=SimpleName): 
-                                                identifier: "toPacket"
-                                            scope(Type=NameExpr): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "ok"
+                                                identifier: "main"
                             - statement(Type=ExpressionStmt): 
                                 expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
-                                        identifier: "writeAndFlush"
-                                    scope(Type=NameExpr): 
+                                        identifier: "TestShowTimeDAO"
+                                    scope(Type=FieldAccessExpr): 
                                         name(Type=SimpleName): 
-                                            identifier: "channel"
-                                    arguments: 
-                                        - argument(Type=NameExpr): 
+                                            identifier: "DAOTest"
+                                        scope(Type=NameExpr): 
                                             name(Type=SimpleName): 
-                                                identifier: "out"
+                                                identifier: "main"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "TestBookingDAO"
+                                    scope(Type=FieldAccessExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "DAOTest"
+                                        scope(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "main"
                     type(Type=VoidType): 
                     name(Type=SimpleName): 
-                        identifier: "success"
+                        identifier: "main"
                     modifiers: 
                         - modifier(Type=Modifier): 
-                            keyword: "PRIVATE"
+                            keyword: "PUBLIC"
+                        - modifier(Type=Modifier): 
+                            keyword: "STATIC"
                     parameters: 
                         - parameter(Type=Parameter): 
                             isVarArgs: "false"
                             name(Type=SimpleName): 
-                                identifier: "channel"
-                            type(Type=ClassOrInterfaceType): 
-                                name(Type=SimpleName): 
-                                    identifier: "Channel"
-                                scope(Type=ClassOrInterfaceType): 
+                                identifier: "a"
+                            type(Type=ArrayType): 
+                                origin: "TYPE"
+                                componentType(Type=ClassOrInterfaceType): 
                                     name(Type=SimpleName): 
-                                        identifier: "channel"
+                                        identifier: "String"
                                     scope(Type=ClassOrInterfaceType): 
                                         name(Type=SimpleName): 
-                                            identifier: "netty"
+                                            identifier: "lang"
                                         scope(Type=ClassOrInterfaceType): 
                                             name(Type=SimpleName): 
-                                                identifier: "io"
+                                                identifier: "java"
             modifiers: 
                 - modifier(Type=Modifier): 
                     keyword: "PUBLIC"

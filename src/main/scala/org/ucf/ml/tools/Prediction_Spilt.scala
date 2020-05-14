@@ -1,5 +1,5 @@
 package org.ucf.ml
-package driver
+package tools
 
 import scala.io.Source
 import java.io.FileWriter
@@ -41,8 +41,5 @@ object Prediction_Spilt {
     tgt_wrong_pred.close()
 
     println(s"Prediction: ${total.size}, ${pred_right.size}, ${pred_wrong.size}")
-
-
-
   }
 }
