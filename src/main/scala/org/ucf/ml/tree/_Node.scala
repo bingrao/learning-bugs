@@ -5,12 +5,12 @@ import com.github.javaparser.ast._
 import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.body.Parameter
 import com.github.javaparser.ast.expr.{SimpleName, Name}
-import utils.{Common, Context}
+import utils.Common
 import scala.collection.JavaConversions._
 trait _Node extends Common {
 
   implicit class addPosition(node:Node) {
-    def getPosition(ctx: utils.Context) = ctx.getNewPosition
+    def getPosition(ctx: Context) = ctx.getNewPosition
   }
 
   implicit class genSimpleName(node:SimpleName) {

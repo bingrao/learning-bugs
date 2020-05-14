@@ -2,9 +2,10 @@ package org.ucf.ml
 package tree
 
 import com.github.javaparser.ast.stmt._
-import com.github.javaparser.ast.body.{VariableDeclarator}
-import utils.Context
+import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr._
+import org.ucf.ml.Context
+
 import scala.collection.JavaConversions._
 
 
@@ -704,7 +705,6 @@ trait _Statement extends _Node {
         ctx.append("=")
         init.get().genCode(ctx)
       }
-
     }
   }
 

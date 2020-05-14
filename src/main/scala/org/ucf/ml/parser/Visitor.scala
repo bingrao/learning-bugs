@@ -24,7 +24,7 @@ trait Visitor extends EnrichedTrees {
   }
 
   @deprecated
-  case class addPositionVisitor(ctx:utils.Context) extends TreeVisitor {
+  case class addPositionVisitor(ctx:Context) extends TreeVisitor {
     override def process(node: Node): Unit = {
       node match {
         case p: PackageDeclaration => {
@@ -72,10 +72,10 @@ trait Visitor extends EnrichedTrees {
       .toList
 
   @deprecated
-  def addPosition(ctx:utils.Context, cu:CompilationUnit) = {
+  def addPosition(ctx:Context, cu:CompilationUnit) = {
     val tree = addPositionVisitor(ctx)
     tree.visitBreadthFirst(cu)
   }
 
-  def addPositionWithGenCode(ctx:utils.Context, cu:CompilationUnit) = cu.genCode(ctx)
+  def addPositionWithGenCode(ctx:Context, cu:CompilationUnit) = cu.genCode(ctx)
 }

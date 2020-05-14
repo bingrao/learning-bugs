@@ -4,7 +4,7 @@ package tree
 import scala.collection.JavaConversions._
 import com.github.javaparser.ast.body._
 import com.github.javaparser.ast._
-import utils.Context
+import org.ucf.ml.Context
 
 
 trait EnrichedTrees extends _Statement{
@@ -95,6 +95,7 @@ trait EnrichedTrees extends _Statement{
         val name = node.getName
         name.genCode(ctx)
         //TODO  the body is not complete at all
+        ctx.append(node.toString)
       }
     }
   }
@@ -102,6 +103,7 @@ trait EnrichedTrees extends _Statement{
   implicit class genAnnotationDeclaration(node:AnnotationDeclaration) {
     def genCode(ctx:Context):Unit = {
       //TODO, No implementation about annotation
+      ctx.append(node.toString)
     }
   }
 
@@ -180,12 +182,14 @@ trait EnrichedTrees extends _Statement{
   implicit class genEnumConstantDeclaration(node:EnumConstantDeclaration) {
     def genCode(ctx:Context):Unit = {
       //TODO, no implmentation for learning bugs
+      ctx.append(node.toString)
     }
   }
 
   implicit class genAnnotationMemberDeclaration(node:AnnotationMemberDeclaration) {
     def genCode(ctx:Context):Unit = {
       //TODO, no implmentation for learning bugs
+      ctx.append(node.toString)
     }
   }
 
@@ -203,6 +207,7 @@ trait EnrichedTrees extends _Statement{
   implicit class genConstructorDeclaration(node:ConstructorDeclaration) {
     def genCode(ctx:Context):Unit = {
       //TODO, no implmentation for learning bugs
+      ctx.append(node.toString)
     }
   }
 
@@ -233,7 +238,6 @@ trait EnrichedTrees extends _Statement{
       val body = node.getBody
       if (body.isPresent) body.get().genCode(ctx)
 
-      
     }
   }
 

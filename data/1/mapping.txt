@@ -1,0 +1,17 @@
+Varl	Varl_0	channel
+Varl	Varl_1	org
+Varl	Varl_2	mycat
+Varl	Varl_3	netty
+Varl	Varl_4	mysql
+Varl	Varl_5	MySQLHandshakeHandler
+Varl	Varl_6	logger
+Varl	Varl_7	ok
+Varl	Varl_8	sequenceId
+Varl	Varl_9	Flags
+Varl	Varl_10	SERVER_STATUS_AUTOCOMMIT
+Varl	Varl_11	input
+Varl	Varl_12	messages
+Varl	Varl_13	Arrays
+Varl	Varl_14	word
+Varl	Varl_15	StringUtils
+Varl	Varl_16	numbers

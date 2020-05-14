@@ -13,6 +13,7 @@ trait Common {
   def write(path:String, context:String) = {
     val printWriter = new PrintWriter(new FileWriter(path))
     printWriter.print(context)
+//    printWriter.append(context)
     printWriter.close()
   }
 
@@ -26,5 +27,4 @@ trait Common {
     }
     idioms
   }
-
 }

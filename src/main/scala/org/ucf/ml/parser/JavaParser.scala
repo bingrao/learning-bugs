@@ -6,14 +6,14 @@ import com.github.javaparser.{JavaToken, StaticJavaParser}
 import com.github.javaparser.ast.CompilationUnit
 import scala.collection.JavaConversions._
 
-class JavaParser extends Visitor  {
+class JavaParser(ctx:Context) extends Visitor  {
 
   /**
    * printAST("./log/UnionMain.Yaml", cu)
    * printAST("./log/UnionMain.Xml", cu, "xml")
    * printAST("./log/UnionMain.dot", cu, "dot")
    *
-   * @param path
+   * @param outPath
    * @param cu
    * @param format
    */
@@ -47,33 +47,5 @@ class JavaParser extends Visitor  {
   def readTokens(filePath:String, granularity:String):List[JavaToken] = {
     val cu = this.getComplationUnit(filePath, granularity)
     this.getTokens(cu)
-  }
-
-}
-
-object JavaParser extends JavaParser {
-  def main(args: Array[String]): Unit = {
-    /**
-     * https://javaparser.org/inspecting-an-ast/
-     */
-    val ctx = new utils.Context
-
-    println("******************Buggy Gen Code **************************")
-    ctx.setCurrentTarget("buggy")
-    val cu_buggy = getComplationUnit("data/1/buggy.java", "method")
-    printAST("./log/buggy.Yaml", cu_buggy)
-    addPositionWithGenCode(ctx, cu_buggy)
-    println(ctx.get_buggy_abstract)
-
-
-    println("******************Fixed Gen Code **************************")
-    ctx.setCurrentTarget("fixed")
-//    val cu_fixed = getComplationUnit("data/1/fixed.java", "method")
-    val cu_fixed = getComplationUnit("src/main/java/org/ucf/ml/JavaApp.java", "class")
-    printAST("./log/fixed.Yaml", cu_fixed)
-    addPositionWithGenCode(ctx, cu_fixed)
-    println(ctx.get_fixed_abstract)
-
-    ctx.dumpy_mapping()
   }
 }

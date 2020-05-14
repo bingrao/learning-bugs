@@ -1,11 +1,11 @@
 package org.ucf.ml
-package utils
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.github.javaparser.ast.`type`.ClassOrInterfaceType
-import com.github.javaparser.ast.expr.{FieldAccessExpr, MethodCallExpr, NameExpr}
 import com.github.javaparser.ast.Node
+import com.github.javaparser.ast.`type`.ClassOrInterfaceType
+import com.github.javaparser.ast.expr.{FieldAccessExpr, MethodCallExpr}
+import org.ucf.ml.utils.{Common, Count}
 
 class Context extends Common {
   private val position_offset = new AtomicInteger()
@@ -14,12 +14,15 @@ class Context extends Common {
 
   private var current_target = "buggy"
   def getCurrentTarget = this.current_target
-  def setCurrentTarget(target:String) = this.current_target = target
+  def setCurrentTarget(target:String) = {
+    this.current_target = target
+    this.position_offset.set(0)
+  }
 
   private val buggy_abstract = new StringBuilder()
   private val fixed_abstract = new StringBuilder()
 
-  def isAddPostion = false
+  def isAddPostion = true
 
   def attachePosition(content:String) = if (isAddPostion) f"${content}#${this.getNewPosition} " else f"${content} "
 
@@ -42,8 +45,7 @@ class Context extends Common {
   /*************************** set up and look up idioms ****************************/
   private val idioms = readIdioms("idioms/idioms.csv")
 
-  def ident_maps = new Count[String, String]("Ident", idioms)
-
+  val ident_maps = new Count[String, String]("Ident", idioms)
   val textBlock_maps = new Count[String, String]("text", idioms)
   val string_maps = new Count[String, String]("String", idioms)
   val char_maps = new Count[String, String]("Char", idioms)
@@ -58,6 +60,7 @@ class Context extends Common {
 
 
   def dumpy_mapping(path:String=null) = {
+    ident_maps.dump_data(path)
     textBlock_maps.dump_data(path)
     string_maps.dump_data(path)
     char_maps.dump_data(path)
@@ -68,16 +71,6 @@ class Context extends Common {
     type_maps.dump_data(path)
     method_maps.dump_data(path)
     variable_maps.dump_data(path)
-  }
-
-
-  private val buffer = new StringBuilder()
-  def prefix_buffer(content:String) = buffer.insert(0, content)
-  def append_buffer(content:String) = buffer.append(content)
-  def get_and_clear_buffer = {
-    val reg = buffer.toString()
-    buffer.clear()
-    reg
   }
 
   def expand_scope(ctx:Context, scope:Node):Unit = {
@@ -99,6 +92,24 @@ class Context extends Common {
       case fd:FieldAccessExpr => {}
       case _ =>{}
     }
+  }
+
+  def clear_context = {
+    this.position_offset.set(0)
+    this.buggy_abstract.clear()
+    this.fixed_abstract.clear()
+
+    this.ident_maps.clear
+    this.textBlock_maps.clear
+    this.string_maps.clear
+    this.char_maps.clear
+    this.int_maps.clear
+    this.float_maps.clear
+    this.long_maps.clear
+    this.double_maps.clear
+    this.type_maps.clear
+    this.method_maps.clear
+    this.variable_maps.clear
   }
 
 }

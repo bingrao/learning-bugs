@@ -1,5 +1,5 @@
 package org.ucf.ml
-package main
+package driver
 
 import scala.io.Source
 import java.io.FileWriter
