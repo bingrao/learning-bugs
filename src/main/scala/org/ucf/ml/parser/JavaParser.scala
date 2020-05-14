@@ -68,16 +68,11 @@ object JavaParser extends JavaParser {
 
     println("******************Fixed Gen Code **************************")
     ctx.setCurrentTarget("fixed")
-    val cu_fixed = getComplationUnit("data/1/fixed.java", "method")
+//    val cu_fixed = getComplationUnit("data/1/fixed.java", "method")
+    val cu_fixed = getComplationUnit("src/main/java/org/ucf/ml/JavaApp.java", "class")
     printAST("./log/fixed.Yaml", cu_fixed)
     addPositionWithGenCode(ctx, cu_fixed)
     println(ctx.get_fixed_abstract)
-
-
-
-
-
-
 
     ctx.dumpy_mapping()
   }

@@ -1,15 +1,22 @@
 package org.ucf.ml;
+import scala.Int;
+
+import java.io.File.*;
+import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+
 public class JavaApp {
-    public static void hello(String input) {
-        System.out.println(input);
+
+    public void hello(String input) {
+        List<String> messages = Arrays.asList("hello", "baeldung", "readers!");
+        messages.forEach(word -> StringUtils.capitalize(word));
+        messages.forEach(StringUtils::capitalize);
+
+        List<Integer> numbers = Arrays.asList(5, 3, 50, 24, 40, 2, 9, 18);
+        numbers.stream().sorted((a, b) -> a.compareTo(b));
+        numbers.stream().sorted(Integer::compareTo);
     }
-
-    public static void main(String[] args) {
-        String input = "output";
-        com.github.javaparser.ast.CompilationUnit cu;
-        System.out.println("This will be printed" + input);
-
-        hello(input);
-    }
-
 }
+
+

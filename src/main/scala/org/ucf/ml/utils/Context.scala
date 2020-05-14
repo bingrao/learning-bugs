@@ -30,8 +30,8 @@ class Context extends Common {
 
   def isNewLine = true
   def appendNewLine(level:Int=0):Unit = this.getCurrentTarget match {
-    case "buggy" => if (isNewLine) this.buggy_abstract.append("\n\t")
-    case "fixed" => if (isNewLine) this.fixed_abstract.append("\n\t")
+    case "buggy" => if (isNewLine) this.buggy_abstract.append("\n")
+    case "fixed" => if (isNewLine) this.fixed_abstract.append("\n")
   }
 
   def get_buggy_abstract = buggy_abstract.toString()
