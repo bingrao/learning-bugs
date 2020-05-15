@@ -1,7 +1,5 @@
 package org.ucf
 
-import org.ucf.ml.utils.Logging
-
 import scala.collection.mutable
 
 package object ml extends Enumeration {
@@ -11,9 +9,9 @@ package object ml extends Enumeration {
 
 
   // input file format
-  val JSON = Value("Json")
-  val JSONL = Value("Jsonl")
-  val NORMAL = Value("Normal")
+  val CLASS = Value("class")
+  val METHOD = Value("method")
+
 
   // Working Mode
   val SOURCE = Value("buggy")
@@ -21,7 +19,7 @@ package object ml extends Enumeration {
 
 
   // add log functions to all Scala Objects
-  implicit class AddLogger(any:AnyRef) {
+  implicit class AddUtils(any:AnyRef) {
     //https://alvinalexander.com/scala/scala-functions-repeat-character-n-times-padding-blanks
     def getIndent(nums:Int) = "\t" * nums
     def printPretty(sb:mutable.StringBuilder, numsIntent:Int) = sb.append("")

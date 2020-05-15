@@ -11,25 +11,25 @@ import scala.collection.JavaConversions._
 trait _Node extends Common {
 
   implicit class addPosition(node:Node) {
-    def getPosition(ctx: Context) = ctx.getNewPosition
+    def getPosition(ctx:Context, numsIntent:Int=0) = ctx.getNewPosition
   }
 
   implicit class genSimpleName(node:SimpleName) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       ctx.append(node.getIdentifier)
       
     }
   }
 
   implicit class genModifier(node: Modifier) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       ctx.append(node.getKeyword.asString())
       
     }
   }
 
   implicit class genType(node:Type) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
 
       node match {
         case tp:UnionType  =>{
@@ -40,7 +40,7 @@ trait _Node extends Common {
           val value = ctx.type_maps.getNewContent(node.asString())
           ctx.append(value)
         }
-        case tp:ReferenceType  => tp.genCode(ctx)
+        case tp:ReferenceType  => tp.genCode(ctx, numsIntent)
         case tp:UnknownType  =>{
           val value = ctx.type_maps.getNewContent(node.asString())
           ctx.append(value)
@@ -67,11 +67,11 @@ trait _Node extends Common {
   }
 
   implicit class genReferenceType(node:ReferenceType) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       node match {
-        case tp: ArrayType => tp.genCode(ctx)
-        case tp: TypeParameter => tp.genCode(ctx)
-        case tp: ClassOrInterfaceType => tp.genCode(ctx)
+        case tp: ArrayType => tp.genCode(ctx, numsIntent)
+        case tp: TypeParameter => tp.genCode(ctx, numsIntent)
+        case tp: ClassOrInterfaceType => tp.genCode(ctx, numsIntent)
       }
     }
   }
@@ -81,27 +81,27 @@ trait _Node extends Common {
    * @param node
    */
   implicit class genArrayType(node:ArrayType) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       //TODO, need more details about
       val origin = node.getOrigin
       val comType = node.getComponentType
-      comType.genCode(ctx)
+      comType.genCode(ctx, numsIntent)
       ctx.append("[")
       ctx.append("]")
     }
   }
 
   implicit class genTypeParameter(node:TypeParameter) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       val name = node.getName
       val typeBound = node.getTypeBound.toList
 
       ctx.append("<")
-      name.genCode(ctx)
+      name.genCode(ctx, numsIntent)
       if (typeBound.size() != 0){
         ctx.append("extends")
         typeBound.foreach(bound => {
-          bound.genCode(ctx)
+          bound.genCode(ctx, numsIntent)
           if (bound != typeBound.last) ctx.append("&")
         })
       }
@@ -110,20 +110,20 @@ trait _Node extends Common {
   }
 
   implicit class genClassOrInterfaceType(node:ClassOrInterfaceType) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       val scope = node.getScope
       val name = node.getName
       val tps = node.getTypeArguments
 
       if (scope.isPresent){
-        scope.get().genCode(ctx)
+        scope.get().genCode(ctx, numsIntent)
         ctx.append(".")
       }
-      name.genCode(ctx)
+      name.genCode(ctx, numsIntent)
 
       if (tps.isPresent){
         ctx.append("<")
-        tps.get().toList.foreach(_.genCode(ctx))
+        tps.get().toList.foreach(_.genCode(ctx, numsIntent))
         ctx.append(">")
       }
     }
@@ -131,23 +131,23 @@ trait _Node extends Common {
 
 
   implicit class genParameter(node:Parameter) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       val tp = node.getType
       val name = node.getName
-      tp.genCode(ctx)
+      tp.genCode(ctx, numsIntent)
 
       val value = ctx.variable_maps.getNewContent(name.asString())
       ctx.append(value)
-//      name.genCode(ctx)
+//      name.genCode(ctx, numsIntent)
     }
   }
 
   implicit class genName(node:Name) {
-    def genCode(ctx:Context):Unit = {
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
 
       val qualifier = node.getQualifier
       if (qualifier.isPresent){
-        qualifier.get().genCode(ctx)
+        qualifier.get().genCode(ctx, numsIntent)
         ctx.append(".")
       }
 

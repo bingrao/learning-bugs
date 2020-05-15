@@ -1,10 +1,7 @@
-private void success(io.netty.channel.Channel channel){
-        org.mycat.netty.mysql.MySQLHandshakeHandler.logger.debug("success info return form MySQLHandshakeHandler");
-        io.netty.buffer.ByteBuf out=channel.alloc().buffer();
-        org.mycat.netty.mysql.OK ok=new org.mycat.netty.mysql.OK();
-        ok.sequenceId=2;
-        ok.setStatusFlag(Flags.SERVER_STATUS_AUTOCOMMIT);
-        out.writeBytes(ok.toPacket());
-        channel.writeAndFlush(out);
+public java.util.List<com.googlecode.mp4parser.authoring.Sample> getSamples() {
+    java.util.ArrayList<com.googlecode.mp4parser.authoring.Sample> lists = new java.util.ArrayList<com.googlecode.mp4parser.authoring.Sample>();
+    for (com.googlecode.mp4parser.authoring.Track track : tracks) {
+        lists.addAll(track.getSamples());
+    }
+    return lists;
 }
-

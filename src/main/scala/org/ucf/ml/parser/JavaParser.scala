@@ -38,14 +38,14 @@ class JavaParser extends Visitor  {
       e.printStackTrace()
   }
 
-  def getComplationUnit(sourcePath:String, granularity:String) = {
+  def getComplationUnit(sourcePath:String, granularity:Value) = {
     val source = Granularity.apply(sourcePath, granularity).getSourceCode()
     StaticJavaParser.parse(source)
   }
 
   def getTokens(cu:CompilationUnit) = cu.getTokenRange.get().toList
 
-  def readTokens(filePath:String, granularity:String):List[JavaToken] = {
+  def readTokens(filePath:String, granularity:Value):List[JavaToken] = {
     val cu = this.getComplationUnit(filePath, granularity)
     this.getTokens(cu)
   }

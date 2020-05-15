@@ -1,18 +1,12 @@
 package org.ucf.ml
 
-import java.nio.file.{Files, Paths}
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.stream.Collectors
 import org.ucf.ml.utils.{Common, Count}
 import scala.collection.mutable
-import java.nio.file.{Files, Paths}
-import java.util.stream.Collectors
-import scala.collection.mutable
-import scala.collection.JavaConversions._
-
 
 class Context(idioms:mutable.HashSet[String]) extends Common {
 
+  /*AST Tree Node Position*/
   private val position_offset = new AtomicInteger()
   def getNewPosition = position_offset.getAndIncrement()
   def getCurrentPositionOffset = position_offset
@@ -25,10 +19,13 @@ class Context(idioms:mutable.HashSet[String]) extends Common {
     this.current_mode = target
   }
 
+  /*Data buffer to store parse results*/
   private val buggy_abstract = new StringBuilder()
   private val fixed_abstract = new StringBuilder()
 
-  def isAddPostion = false
+  /**/
+  private var isAddPostion = false
+  def setPosition(value:Boolean) = this.isAddPostion = value
 
   def attachePosition(content:String) = if (isAddPostion) f"${content}#${this.getNewPosition} " else f"${content} "
 
@@ -37,7 +34,9 @@ class Context(idioms:mutable.HashSet[String]) extends Common {
     case TARGET => this.fixed_abstract.append(attachePosition(content))
   }
 
-  def isNewLine = false
+  private var isNewLine = false
+  def setNewLine(value:Boolean) = this.isNewLine = value
+
   def appendNewLine(level:Int=0):Unit = this.getCurrentMode match {
     case SOURCE => if (isNewLine) this.buggy_abstract.append("\n")
     case TARGET => if (isNewLine) this.fixed_abstract.append("\n")

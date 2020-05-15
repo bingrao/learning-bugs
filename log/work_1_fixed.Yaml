@@ -1,0 +1,60 @@
+public class DummyClass {
+
+    private void handleHolds(model.patron.Patron patron) {
+        this.printHoldAlertMessage(patron);
+        this.dealWithEachHold(patron);
+    }
+}
+---
+root(Type=CompilationUnit): 
+    types: 
+        - type(Type=ClassOrInterfaceDeclaration): 
+            isInterface: "false"
+            name(Type=SimpleName): 
+                identifier: "DummyClass"
+            members: 
+                - member(Type=MethodDeclaration): 
+                    body(Type=BlockStmt): 
+                        statements: 
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "printHoldAlertMessage"
+                                    scope(Type=ThisExpr): 
+                                    arguments: 
+                                        - argument(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "patron"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "dealWithEachHold"
+                                    scope(Type=ThisExpr): 
+                                    arguments: 
+                                        - argument(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "patron"
+                    type(Type=VoidType): 
+                    name(Type=SimpleName): 
+                        identifier: "handleHolds"
+                    modifiers: 
+                        - modifier(Type=Modifier): 
+                            keyword: "PRIVATE"
+                    parameters: 
+                        - parameter(Type=Parameter): 
+                            isVarArgs: "false"
+                            name(Type=SimpleName): 
+                                identifier: "patron"
+                            type(Type=ClassOrInterfaceType): 
+                                name(Type=SimpleName): 
+                                    identifier: "Patron"
+                                scope(Type=ClassOrInterfaceType): 
+                                    name(Type=SimpleName): 
+                                        identifier: "patron"
+                                    scope(Type=ClassOrInterfaceType): 
+                                        name(Type=SimpleName): 
+                                            identifier: "model"
+            modifiers: 
+                - modifier(Type=Modifier): 
+                    keyword: "PUBLIC"
+...

@@ -37,9 +37,9 @@ case class Granularity_Method(sourcePath:String) extends Granularity {
 
 
 object Granularity {
-  def apply(sourcePath:String, granularity: String): Granularity = granularity match {
-    case "class" => Granularity_Class(sourcePath)
-    case "method" => Granularity_Method(sourcePath)
+  def apply(sourcePath:String, granularity: Value): Granularity = granularity match {
+    case CLASS => Granularity_Class(sourcePath)
+    case METHOD => Granularity_Method(sourcePath)
     case _ => Granularity_Class(sourcePath)
   }
 }

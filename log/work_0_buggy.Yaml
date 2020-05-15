@@ -1,0 +1,90 @@
+public class DummyClass {
+
+    public void show() {
+        org.iabako.client.ui.layout.widget.dialogbox.IabakoDialogBox.popup.center();
+        org.iabako.client.ui.layout.widget.dialogbox.IabakoDialogBox.popup.show();
+    }
+}
+---
+root(Type=CompilationUnit): 
+    types: 
+        - type(Type=ClassOrInterfaceDeclaration): 
+            isInterface: "false"
+            name(Type=SimpleName): 
+                identifier: "DummyClass"
+            members: 
+                - member(Type=MethodDeclaration): 
+                    body(Type=BlockStmt): 
+                        statements: 
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "center"
+                                    scope(Type=FieldAccessExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "popup"
+                                        scope(Type=FieldAccessExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "IabakoDialogBox"
+                                            scope(Type=FieldAccessExpr): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "dialogbox"
+                                                scope(Type=FieldAccessExpr): 
+                                                    name(Type=SimpleName): 
+                                                        identifier: "widget"
+                                                    scope(Type=FieldAccessExpr): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "layout"
+                                                        scope(Type=FieldAccessExpr): 
+                                                            name(Type=SimpleName): 
+                                                                identifier: "ui"
+                                                            scope(Type=FieldAccessExpr): 
+                                                                name(Type=SimpleName): 
+                                                                    identifier: "client"
+                                                                scope(Type=FieldAccessExpr): 
+                                                                    name(Type=SimpleName): 
+                                                                        identifier: "iabako"
+                                                                    scope(Type=NameExpr): 
+                                                                        name(Type=SimpleName): 
+                                                                            identifier: "org"
+                            - statement(Type=ExpressionStmt): 
+                                expression(Type=MethodCallExpr): 
+                                    name(Type=SimpleName): 
+                                        identifier: "show"
+                                    scope(Type=FieldAccessExpr): 
+                                        name(Type=SimpleName): 
+                                            identifier: "popup"
+                                        scope(Type=FieldAccessExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "IabakoDialogBox"
+                                            scope(Type=FieldAccessExpr): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "dialogbox"
+                                                scope(Type=FieldAccessExpr): 
+                                                    name(Type=SimpleName): 
+                                                        identifier: "widget"
+                                                    scope(Type=FieldAccessExpr): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "layout"
+                                                        scope(Type=FieldAccessExpr): 
+                                                            name(Type=SimpleName): 
+                                                                identifier: "ui"
+                                                            scope(Type=FieldAccessExpr): 
+                                                                name(Type=SimpleName): 
+                                                                    identifier: "client"
+                                                                scope(Type=FieldAccessExpr): 
+                                                                    name(Type=SimpleName): 
+                                                                        identifier: "iabako"
+                                                                    scope(Type=NameExpr): 
+                                                                        name(Type=SimpleName): 
+                                                                            identifier: "org"
+                    type(Type=VoidType): 
+                    name(Type=SimpleName): 
+                        identifier: "show"
+                    modifiers: 
+                        - modifier(Type=Modifier): 
+                            keyword: "PUBLIC"
+            modifiers: 
+                - modifier(Type=Modifier): 
+                    keyword: "PUBLIC"
+...
