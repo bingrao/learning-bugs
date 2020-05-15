@@ -19,8 +19,8 @@ class JavaParser extends Visitor  {
    * @param format
    */
 
-  def printAST(outPath:String=null, cu: CompilationUnit, format:String = "ymal") = try {
-    if (outPath == null){
+  def printAST(outPath:String=null, cu: CompilationUnit, format:String = null) = try {
+    if ((outPath == null) && (format == null)){
       logger.info("The input source code is: ")
       println(cu.toString)
     } else {
@@ -30,7 +30,10 @@ class JavaParser extends Visitor  {
         case "dot" => (new DotPrinter(true)).output(cu)
         case "ymal" | _ => (new YamlPrinter(true)).output(cu)
       }
-      write(outPath, context = cu.toString() + context)
+      if (outPath != null)
+        write(outPath, context = cu.toString() + context)
+      else
+        println(context)
     }
   } catch {
     case e:Exception =>{
@@ -38,14 +41,14 @@ class JavaParser extends Visitor  {
       e.printStackTrace()
   }
 
-  def getComplationUnit(sourcePath:String, granularity:Value) = {
-    val source = Granularity.apply(sourcePath, granularity).getSourceCode()
+  def getComplationUnit(sourcePath:String, granularity:Value, isFile:Boolean = true) = {
+    val source = Granularity.apply(sourcePath, granularity, isFile).getSourceCode()
     StaticJavaParser.parse(source)
   }
 
   def getTokens(cu:CompilationUnit) = cu.getTokenRange.get().toList
 
-  def readTokens(filePath:String, granularity:Value):List[JavaToken] = {
+  def readTokens(filePath:String, granularity:Value, isFile:Boolean = true):List[JavaToken] = {
     val cu = this.getComplationUnit(filePath, granularity)
     this.getTokens(cu)
   }

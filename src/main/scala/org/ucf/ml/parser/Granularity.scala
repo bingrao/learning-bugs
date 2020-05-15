@@ -5,9 +5,9 @@ import java.io.IOException
 import java.nio.file.{Files, Paths}
 
 abstract class Granularity extends utils.Common {
-  protected def readSourceCode(input:String) = {
+  protected def readSourceCode(input:String, isFile:Boolean = true) = {
     val reg:String = try {
-      if(Files.exists(Paths.get(input))){
+      if(isFile) {
         new String(Files.readAllBytes(Paths.get(input)))
       } else {
         input
@@ -26,20 +26,20 @@ abstract class Granularity extends utils.Common {
   def getSourceCode(input:String=null):String
 }
 
-case class Granularity_Class(sourcePath:String) extends Granularity {
-  override def getSourceCode(input: String=sourcePath): String = readSourceCode(input)
+case class Granularity_Class(sourcePath:String, isFile:Boolean = true) extends Granularity {
+  override def getSourceCode(input: String=sourcePath): String = readSourceCode(input, isFile)
 }
 
-case class Granularity_Method(sourcePath:String) extends Granularity {
+case class Granularity_Method(sourcePath:String, isFile:Boolean = true) extends Granularity {
   override def getSourceCode(input: String=sourcePath): String =
-    raw"public class DummyClass { ${readSourceCode(input)} }"
+    raw"public class DummyClass { ${readSourceCode(input, isFile)} }"
 }
 
 
 object Granularity {
-  def apply(sourcePath:String, granularity: Value): Granularity = granularity match {
-    case CLASS => Granularity_Class(sourcePath)
-    case METHOD => Granularity_Method(sourcePath)
-    case _ => Granularity_Class(sourcePath)
+  def apply(sourcePath:String, granularity: Value, isFile:Boolean = true): Granularity = granularity match {
+    case CLASS => Granularity_Class(sourcePath, isFile)
+    case METHOD => Granularity_Method(sourcePath, isFile)
+    case _ => Granularity_Class(sourcePath, isFile)
   }
 }
