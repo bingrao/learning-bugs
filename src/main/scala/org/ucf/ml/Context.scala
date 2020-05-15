@@ -46,6 +46,10 @@ class Context(idioms:mutable.HashSet[String]) extends Common {
   def get_fixed_abstract = fixed_abstract.toString()
 
 
+  /* Generating abstrace code */
+  var isAbstract = true
+  def setIsAbstract(value:Boolean) = this.isAbstract = value
+
   ///////////////////////////////////////////////////////////////////////////////////////
   /********************* set up and look up statistical data ***************************/
 

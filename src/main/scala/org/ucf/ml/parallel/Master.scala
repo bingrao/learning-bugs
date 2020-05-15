@@ -2,12 +2,8 @@ package org.ucf.ml
 package parallel
 
 
-import java.nio.file.{Files, Paths}
-import java.util.stream.Collectors
 import java.util.concurrent.{Executors, ExecutorService}
-import scala.collection.mutable
-import scala.collection.JavaConversions._
-import java.util.concurrent.Executors
+
 class Master (configPath:String = "src/main/resources/application.conf") extends utils.Common {
 
   /* Load configurations from a file*/
@@ -35,11 +31,7 @@ class Master (configPath:String = "src/main/resources/application.conf") extends
 
   // Create workers with allocated data
   val workers  = for (index <- 0 until nums_worker) yield {
-    // Debug problem
-//    val start = 0
-//    val end = 1
-
-
+    
     val start = index*batch_size
     val end = if (index == nums_worker - 1) total_files_nums else (index + 1) * batch_size
 
@@ -58,18 +50,6 @@ class Master (configPath:String = "src/main/resources/application.conf") extends
   }
 
   /*################################# Helper Functions #####################################*/
-
-  /*load Data idioms from existing file*/
-  def readIdioms(filePath:String) = {
-    var idioms = new mutable.HashSet[String]()
-    try{
-      val stream = Files.lines(Paths.get(filePath))
-      idioms.++=(stream.collect(Collectors.toSet[String]()))
-    } catch {
-      case e:Exception => e.printStackTrace()
-    }
-    idioms
-  }
 
   def loadAndCheckData(srcPath:String, tgtPath:String):(List[String], List[String]) = {
     val srcFiles = getListOfFiles(srcPath)

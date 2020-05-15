@@ -120,7 +120,10 @@ trait EnrichedTrees extends utils.Common {
       if (node.isInterface) ctx.append("interface") else ctx.append("class")
 
       // 2. Interface/Class Name
-      ctx.append(ctx.type_maps.getNewContent(node.getNameAsString))
+      if (ctx.isAbstract)
+        ctx.append(ctx.type_maps.getNewContent(node.getNameAsString))
+      else
+        node.getName.genCode(ctx)
 
       // 3. type parameters public interface Predicate<T> {}
       val tps = node.getTypeParameters.toList
@@ -225,8 +228,11 @@ trait EnrichedTrees extends utils.Common {
       node.getType.genCode(ctx, numsIntent)
 
       /*Method name, such as hello*/
-      val value = ctx.method_maps.getNewContent(node.getName.toString())
-      ctx.append(value)
+      if (ctx.isAbstract) {
+        val value = ctx.method_maps.getNewContent(node.getName.toString())
+        ctx.append(value)
+      } else
+        node.getName.genCode(ctx)
 
       /*formal paramters*/
       ctx.append("(")
@@ -313,8 +319,10 @@ trait EnrichedTrees extends utils.Common {
   implicit class genExpressionStmt(node:ExpressionStmt) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit  = {
       node.getExpression.genCode(ctx, numsIntent)
-      ctx.append(";")
-      ctx.appendNewLine()
+      if (!node.getParentNode.get().isInstanceOf[Expression]) {
+        ctx.append(";")
+        ctx.appendNewLine()
+      }
     }
   }
 
@@ -698,14 +706,18 @@ trait EnrichedTrees extends utils.Common {
       val arguments = node.getArguments.toList
 
       if (scope.isPresent) {
-        //        val scope_value = ctx.variable_maps.getNewContent(scope.get().toString)
-        //        ctx.append(scope_value)
-        scope.get().genCode(ctx, numsIntent)
+
+        if (ctx.isAbstract) {
+          val scope_value = ctx.variable_maps.getNewContent(scope.get().toString)
+          ctx.append(scope_value)
+        } else
+          scope.get().genCode(ctx, numsIntent)
         ctx.append(".")
       }
-
-      val funcName = ctx.method_maps.getNewContent(node.getName.asString())
-      ctx.append(funcName)
+      if (ctx.isAbstract) {
+        val funcName = ctx.method_maps.getNewContent(node.getName.asString())
+        ctx.append(funcName)
+      } else node.getName.genCode(ctx)
 
       ctx.append("(")
       arguments.foreach(expr => {
@@ -756,9 +768,9 @@ trait EnrichedTrees extends utils.Common {
   implicit class genNameExpr(node:NameExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       //      node.getName.genCode(ctx, numsIntent)
-
-      ctx.append(ctx.variable_maps.getNewContent(node.getName.asString()))
-
+      if (ctx.isAbstract) {
+        ctx.append(ctx.variable_maps.getNewContent(node.getName.asString()))
+      } else node.getName.genCode(ctx)
     }
   }
 
@@ -858,42 +870,42 @@ trait EnrichedTrees extends utils.Common {
 
   implicit class genTextBlockLiteralExpr(node:TextBlockLiteralExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      val value = ctx.textBlock_maps.getNewContent(node.getValue)
+      val value = if (ctx.isAbstract) ctx.textBlock_maps.getNewContent(node.getValue) else node.asString()
       ctx.append(value)
     }
   }
 
   implicit class genCharLiteralExpr(node:CharLiteralExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      val value = ctx.char_maps.getNewContent(node.getValue)
+      val value = if (ctx.isAbstract) ctx.char_maps.getNewContent(node.getValue) else node.asChar().toString
       ctx.append(value)
     }
   }
 
   implicit class genDoubleLiteralExpr(node:DoubleLiteralExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      val value = ctx.double_maps.getNewContent(node.getValue)
+      val value = if (ctx.isAbstract)  ctx.double_maps.getNewContent(node.getValue) else node.asDouble().toString
       ctx.append(value)
     }
   }
 
   implicit class genLongLiteralExpr(node:LongLiteralExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      val value = ctx.long_maps.getNewContent(node.getValue)
+      val value = if (ctx.isAbstract)  ctx.long_maps.getNewContent(node.getValue) else node.asNumber().toString
       ctx.append(value)
     }
   }
 
   implicit class genStringLiteralExpr(node:StringLiteralExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      val value = ctx.string_maps.getNewContent(node.getValue)
-      ctx.append(value)
+      val value = if (ctx.isAbstract)  ctx.string_maps.getNewContent(node.getValue) else node.asString()
+      ctx.append("\"" + value + "\"")
     }
   }
 
   implicit class genIntegerLiteralExpr(node:IntegerLiteralExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      val value = ctx.int_maps.getNewContent(node.getValue)
+      val value = if (ctx.isAbstract)  ctx.int_maps.getNewContent(node.getValue) else node.asNumber().toString
       ctx.append(value)
     }
   }
@@ -970,18 +982,21 @@ trait EnrichedTrees extends utils.Common {
 
   implicit class genFieldAccessExpr(node:FieldAccessExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      //      val scope_value = ctx.variable_maps.getNewContent(node.getScope.toString)
-      //      ctx.append(scope_value)
-      node.getScope.genCode(ctx, numsIntent)
+
+      if (ctx.isAbstract) {
+        val scope_value = ctx.variable_maps.getNewContent(node.getScope.toString)
+        ctx.append(scope_value)
+      } else
+        node.getScope.genCode(ctx, numsIntent)
 
       ctx.append(".")
 
       // filed
-      val name = ctx.variable_maps.getNewContent(node.getName.asString())
-      ctx.append(name)
-
-
-
+      if (ctx.isAbstract) {
+        val name = ctx.variable_maps.getNewContent(node.getName.asString())
+        ctx.append(name)
+      } else
+        node.getName.genCode(ctx)
     }
   }
 
@@ -1012,7 +1027,11 @@ trait EnrichedTrees extends utils.Common {
 
       tp.genCode(ctx, numsIntent)
 
-      ctx.append(ctx.variable_maps.getNewContent(name.asString()))
+      if (ctx.isAbstract) {
+        val value =  ctx.variable_maps.getNewContent(name.asString())
+        ctx.append(value)
+      } else name.genCode(ctx)
+
 
       if (init.isPresent){
         ctx.append("=")
@@ -1046,33 +1065,32 @@ trait EnrichedTrees extends utils.Common {
 
       node match {
         case tp:UnionType  =>{
-          val value = ctx.type_maps.getNewContent(node.asString())
+          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
           ctx.append(value)
         }
         case tp:VarType  =>{
-          val value = ctx.type_maps.getNewContent(node.asString())
+          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
           ctx.append(value)
         }
         case tp:ReferenceType  => tp.genCode(ctx, numsIntent)
         case tp:UnknownType  =>{
-          val value = ctx.type_maps.getNewContent(node.asString())
+          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
           ctx.append(value)
         }
         case tp:PrimitiveType  =>{
-          //          val value = ctx.type_maps.getNewContent(node.asString())
-          //          ctx.append(value)
-          ctx.append(tp.asString())
+          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
+          ctx.append(value)
         }
         case tp:WildcardType  =>{
-          val value = ctx.type_maps.getNewContent(node.asString())
+          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
           ctx.append(value)
         }
         case tp:VoidType  =>{
-          val value = ctx.type_maps.getNewContent(node.asString())
+          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
           ctx.append(value)
         }
         case tp:IntersectionType  =>{
-          val value = ctx.type_maps.getNewContent(node.asString())
+          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
           ctx.append(value)
         }
       }
@@ -1149,9 +1167,11 @@ trait EnrichedTrees extends utils.Common {
       val name = node.getName
       tp.genCode(ctx, numsIntent)
 
-      val value = ctx.variable_maps.getNewContent(name.asString())
-      ctx.append(value)
-      //      name.genCode(ctx, numsIntent)
+      if (ctx.isAbstract) {
+        val value =  ctx.variable_maps.getNewContent(name.asString())
+        ctx.append(value)
+      } else
+        name.genCode(ctx, numsIntent)
     }
   }
 
@@ -1174,7 +1194,10 @@ trait EnrichedTrees extends utils.Common {
         val expr_scope = expr.getScope
 
         // method name
-        ctx.method_maps.getNewContent(expr_name.asString())
+        if (ctx.isAbstract) {
+          ctx.method_maps.getNewContent(expr_name.asString())
+        } else
+          expr_name.genCode(ctx)
 
         if (expr_scope.isPresent) expand_scope(ctx, expr_scope.get())
       }
