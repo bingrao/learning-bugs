@@ -29,7 +29,7 @@ class Context(idioms:mutable.HashSet[String]) extends Common {
 
   def attachePosition(content:String) = if (isAddPostion) f"${content}#${this.getNewPosition} " else f"${content} "
 
-  def append(content:String) = this.getCurrentMode match {
+  def append(content:String, numsIntent:Int = 0) = this.getCurrentMode match {
     case SOURCE => this.buggy_abstract.append(attachePosition(content))
     case TARGET => this.fixed_abstract.append(attachePosition(content))
   }

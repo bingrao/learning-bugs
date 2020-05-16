@@ -9,13 +9,15 @@ object TestUtils extends parser.JavaParser{
 
     ctx.setCurrentMode(SOURCE)
     ctx.setNewLine(true)
-    ctx.setIsAbstract(false)
+    ctx.setIsAbstract(true)
     val cu = getComplationUnit(sourcePath, granularity, isFile)
 
     printAST(outPath="log/test.Yaml", cu = cu, format = "ymal")
 
     addPositionWithGenCode(ctx, cu)
     ctx.clear
+    println(cu)
+    println("***************************************************")
     ctx.get_buggy_abstract.toString
   }
 

@@ -28,9 +28,7 @@ class TestAbstract {
         |    }
         |}
         |""".stripMargin
-
     println(TestUtils.get_abstract_code(inputClass, CLASS, false))
-
   }
 
   @Test def testAbstractFile(): Unit ={
