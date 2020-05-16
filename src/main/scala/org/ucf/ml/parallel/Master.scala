@@ -38,7 +38,8 @@ class Master (configPath:String = "src/main/resources/application.conf") extends
     new Worker(src_batch = buggy_files.slice(start, end),
       tgt_batch = fixed_files.slice(start, end),
       idioms=project_idioms,
-      worker_id = index)
+      worker_id = index,
+      granularity = METHOD)
   }
 
   /* Submit workers to executors and start them*/

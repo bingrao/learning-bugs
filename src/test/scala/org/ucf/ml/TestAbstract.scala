@@ -28,11 +28,11 @@ class TestAbstract {
         |    }
         |}
         |""".stripMargin
-    println(TestUtils.get_abstract_code(inputClass, CLASS, false))
+    TestUtils.get_abstract_code(inputClass, CLASS, false)
   }
 
   @Test def testAbstractFile(): Unit ={
     val input = "data/raw/buggy/1.java"
-    println(TestUtils.get_abstract_code(input, METHOD, true))
+    TestUtils.get_abstract_code(input, METHOD, true)
   }
 }

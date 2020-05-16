@@ -15,14 +15,14 @@ import scala.collection.mutable
 class Worker(src_batch:List[String] = null,
              tgt_batch:List[String] = null,
              idioms:mutable.HashSet[String],
-             worker_id:Int) extends Callable[String] with utils.Common{
+             worker_id:Int, granularity: Value = METHOD) extends Callable[String] with utils.Common{
 
   val javaPaser = new parser.JavaParser
-  val ctx = new Context(idioms)
+  val ctx = new Context(idioms, granularity)
 
   val batch_size = scala.math.min(src_batch.size, tgt_batch.size)
 
-  def abstract_task(inputPath:String, mode:Value, granularity:Value = METHOD) = {
+  def abstract_task(inputPath:String, mode:Value, granularity:Value = this.granularity) = {
 
     logger.debug(f"Worker ${worker_id} process ${mode} Source code ${inputPath}")
     ctx.setCurrentMode(mode)

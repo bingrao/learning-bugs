@@ -35,7 +35,7 @@ trait EnrichedTrees extends utils.Common {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("package") else "package")
 
-      node.getName.genCode(ctx, numsIntent)
+      node.getName.genCode(ctx)
       ctx.append(";")
       ctx.appendNewLine()
     }
@@ -109,35 +109,36 @@ trait EnrichedTrees extends utils.Common {
 
   implicit class genClassOrInterfaceDeclaration(node:ClassOrInterfaceDeclaration) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      // 1. Class Modifiers, such as public/private
-      val modifiers = node.getModifiers
-      modifiers.foreach(modifier => modifier.genCode(ctx, numsIntent))
 
-      if (node.isInterface)
-        ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("interface") else "interface")
-      else
-        ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("class") else "class")
+      if (ctx.getGranularity == CLASS) {
+        // 1. Class Modifiers, such as public/private
+        val modifiers = node.getModifiers
+        modifiers.foreach(modifier => modifier.genCode(ctx, numsIntent))
 
-      // 2. Interface/Class Name
-      if (ctx.isAbstract)
-        ctx.append(ctx.type_maps.getNewContent(node.getNameAsString))
-      else
-        node.getName.genCode(ctx)
+        if (node.isInterface)
+          ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("interface") else "interface")
+        else
+          ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("class") else "class")
 
-      // 3. type parameters public interface Predicate<T> {}
-      val tps = node.getTypeParameters
-      tps.foreach(_.genCode(ctx, numsIntent))
+        // 2. Interface/Class Name
+        if (ctx.isAbstract)
+          ctx.append(ctx.type_maps.getNewContent(node.getNameAsString))
+        else
+          node.getName.genCode(ctx)
 
-      ctx.append("{")
-      ctx.appendNewLine()
+        // 3. type parameters public interface Predicate<T> {}
+        val tps = node.getTypeParameters
+        tps.foreach(_.genCode(ctx, numsIntent))
 
+        ctx.append("{")
+        ctx.appendNewLine()
+      }
       // 3. Class Members: Filed and method, constructor
       val members = node.getMembers
       members.foreach(bodyDecl => bodyDecl.genCode(ctx, numsIntent))
 
-      ctx.append("}")
+      if (ctx.getGranularity == CLASS) ctx.append("}")
       ctx.appendNewLine()
-      
     }
   }
 
@@ -169,10 +170,8 @@ trait EnrichedTrees extends utils.Common {
 
       val varibles = node.getVariables
       varibles.foreach(ele => {
-        if (ele == varibles.head)
-            ele.getType.genCode(ctx)
-
-        ele.getName.genCode(ctx)
+        if (ele == varibles.head) ele.getType.genCode(ctx)
+        if (ctx.isAbstract) ctx.append(ctx.variable_maps.getNewContent(ele.getNameAsString)) else ele.getName.genCode(ctx)
 
         if (ele.getInitializer.isPresent){
           ctx.append("=")
@@ -229,7 +228,7 @@ trait EnrichedTrees extends utils.Common {
 
       /*Method name, such as hello*/
       if (ctx.isAbstract)
-        ctx.append(ctx.method_maps.getNewContent(node.getName.toString()))
+        ctx.append(ctx.method_maps.getNewContent(node.getNameAsString))
       else
         node.getName.genCode(ctx)
 
@@ -1047,42 +1046,33 @@ trait EnrichedTrees extends utils.Common {
   implicit class genModifier(node: Modifier) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       ctx.append(node.getKeyword.asString())
-
     }
   }
 
   implicit class genType(node:Type) {
-    def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-
+    def genCode(ctx:Context, numsIntent:Int=0):Unit = if (!node.asString().isEmpty){
       node match {
         case tp:UnionType  =>{
-          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
-          ctx.append(value)
+          ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:VarType  =>{
-          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
-          ctx.append(value)
+          ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:ReferenceType  => tp.genCode(ctx, numsIntent)
         case tp:UnknownType  =>{
-          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
-          ctx.append(value)
+          ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:PrimitiveType  =>{
-          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
-          ctx.append(value)
+          ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:WildcardType  =>{
-          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
-          ctx.append(value)
+          ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:VoidType  =>{
-          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
-          ctx.append(value)
+          ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:IntersectionType  =>{
-          val value = if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString()
-          ctx.append(value)
+          ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
       }
     }
@@ -1119,7 +1109,8 @@ trait EnrichedTrees extends utils.Common {
       val typeBound = node.getTypeBound
 
       ctx.append("<")
-      name.genCode(ctx, numsIntent)
+
+      if (ctx.isAbstract) ctx.append(ctx.type_maps.getNewContent(name.asString())) else name.genCode(ctx, numsIntent)
       if (typeBound.size() != 0){
         ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("extends") else "extends")
         typeBound.foreach(bound => {
@@ -1136,12 +1127,15 @@ trait EnrichedTrees extends utils.Common {
       val scope = node.getScope
       val name = node.getName
       val tps = node.getTypeArguments
-
+      //TODO with scope
       if (scope.isPresent){
-        scope.get().genCode(ctx, numsIntent)
+        if (ctx.isAbstract)
+          ctx.append(ctx.ident_maps.getNewContent(scope.get().getNameAsString))
+        else
+          scope.get().genCode(ctx, numsIntent)
         ctx.append(".")
       }
-      name.genCode(ctx, numsIntent)
+      if (ctx.isAbstract) ctx.append(ctx.type_maps.getNewContent(name.asString())) else name.genCode(ctx, numsIntent)
 
       if (tps.isPresent){
         ctx.append("<")
@@ -1156,11 +1150,11 @@ trait EnrichedTrees extends utils.Common {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       val tp = node.getType
       val name = node.getName
+
       tp.genCode(ctx, numsIntent)
 
       if (ctx.isAbstract) {
-        val value =  ctx.variable_maps.getNewContent(name.asString())
-        ctx.append(value)
+        ctx.append(ctx.variable_maps.getNewContent(name.asString()))
       } else
         name.genCode(ctx, numsIntent)
     }
@@ -1168,13 +1162,17 @@ trait EnrichedTrees extends utils.Common {
 
   implicit class genName(node:Name) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
+
+      //TODO with Qualifier
       val qualifier = node.getQualifier
       if (qualifier.isPresent){
-        qualifier.get().genCode(ctx, numsIntent)
+        if (ctx.isAbstract)
+          ctx.append(ctx.ident_maps.getNewContent(qualifier.get().asString()))
+        else
+          qualifier.get().genCode(ctx, numsIntent)
         ctx.append(".")
       }
-      val name = node.getIdentifier
-      ctx.append(name)
+      if (ctx.isAbstract) ctx.append(ctx.variable_maps.getNewContent(node.getIdentifier)) else ctx.append(node.getIdentifier)
     }
   }
 

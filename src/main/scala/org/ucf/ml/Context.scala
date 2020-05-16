@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.ucf.ml.utils.{Common, Count}
 import scala.collection.mutable
 
-class Context(idioms:mutable.HashSet[String]) extends Common {
+class Context(idioms:mutable.HashSet[String], granularity: Value = METHOD) extends Common {
 
   /*AST Tree Node Position*/
   private val position_offset = new AtomicInteger()
@@ -50,6 +50,7 @@ class Context(idioms:mutable.HashSet[String]) extends Common {
   var isAbstract = true
   def setIsAbstract(value:Boolean) = this.isAbstract = value
 
+  def getGranularity = granularity
   ///////////////////////////////////////////////////////////////////////////////////////
   /********************* set up and look up statistical data ***************************/
 

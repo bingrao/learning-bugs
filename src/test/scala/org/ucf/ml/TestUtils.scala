@@ -15,10 +15,13 @@ object TestUtils extends parser.JavaParser{
     printAST(outPath="log/test.Yaml", cu = cu, format = "ymal")
 
     addPositionWithGenCode(ctx, cu)
-    ctx.clear
+
     println(cu)
     println("***************************************************")
-    ctx.get_buggy_abstract.toString
+    println(ctx.get_buggy_abstract.toString)
+    println("***************************************************")
+    ctx.dumpy_mapping()
+    ctx.clear
   }
 
 }
