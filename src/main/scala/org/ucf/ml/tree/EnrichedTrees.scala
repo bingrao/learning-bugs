@@ -241,6 +241,17 @@ trait EnrichedTrees extends utils.Common {
       })
       ctx.append(")")
 
+      val exceptions = node.getThrownExceptions
+      if (exceptions.size() != 0) {
+        if (ctx.isAbstract)
+          ctx.append(ctx.ident_maps.getNewContent("throws"))
+        else
+          ctx.append("throws")
+        node.getThrownExceptions.foreach(exp => {
+          exp.genCode(ctx)
+          if (exp != exceptions.last) ctx.append(",")
+        })
+      }
       /*Method Body*/
       val body = node.getBody
       if (body.isPresent) body.get().genCode(ctx, numsIntent)
@@ -697,13 +708,18 @@ trait EnrichedTrees extends utils.Common {
 
       if (scope.isPresent) {
 
-        if (ctx.isAbstract) {
-          val scope_value = ctx.variable_maps.getNewContent(scope.get().toString)
-          ctx.append(scope_value)
-        } else
+        if (isScopeExpand(scope.get(), ctx)){
           scope.get().genCode(ctx, numsIntent)
+        } else {
+          if (ctx.isAbstract) {
+            val scope_value = ctx.variable_maps.getNewContent(scope.get().toString)
+            ctx.append(scope_value)
+          } else
+            scope.get().genCode(ctx, numsIntent)
+        }
         ctx.append(".")
       }
+
       if (ctx.isAbstract) {
         val funcName = ctx.method_maps.getNewContent(node.getName.asString())
         ctx.append(funcName)
@@ -751,7 +767,7 @@ trait EnrichedTrees extends utils.Common {
 
   implicit class genThisExpr(node:ThisExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("This") else "This")
+      ctx.append(if (ctx.isAbstract) ctx.ident_maps.getNewContent("this") else "this")
     }
   }
 
@@ -766,7 +782,12 @@ trait EnrichedTrees extends utils.Common {
   implicit class genCastExpr(node:CastExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       //TODO no implement for this project
-      ctx.append(node.toString, numsIntent)
+      ctx.append("(")
+      node.getType.genCode(ctx)
+      ctx.append(")")
+      ctx.append("(")
+      node.getExpression.genCode(ctx)
+      ctx.append(")")
     }
   }
 
@@ -774,10 +795,17 @@ trait EnrichedTrees extends utils.Common {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       val ident = node.getIdentifier
       val scope = node.getScope
-
-      scope.genCode(ctx, numsIntent)
+      if (isScopeExpand(scope, ctx)) {
+        scope.genCode(ctx, numsIntent)
+      } else {
+        if (ctx.isAbstract)
+          ctx.append(ctx.ident_maps.getNewContent(scope.toString))
+        else
+          scope.genCode(ctx, numsIntent)
+      }
       ctx.append("::")
-      ctx.append(ident)
+
+      if (ctx.isAbstract) ctx.append(ctx.variable_maps.getNewContent(ident)) else ctx.append(ident)
     }
   }
 
@@ -913,7 +941,14 @@ trait EnrichedTrees extends utils.Common {
       val tp = node.getType
 
       if (scope.isPresent) {
-        scope.get().genCode(ctx, numsIntent)
+        if (isScopeExpand(scope.get(),ctx)){
+          scope.get().genCode(ctx, numsIntent)
+        } else {
+          if (ctx.isAbstract)
+            ctx.append(ctx.ident_maps.getNewContent(scope.toString))
+          else
+            scope.get().genCode(ctx, numsIntent)
+        }
         ctx.append(".")
       }
 
@@ -973,17 +1008,20 @@ trait EnrichedTrees extends utils.Common {
   implicit class genFieldAccessExpr(node:FieldAccessExpr) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
 
-      if (ctx.isAbstract) {
-        val scope_value = ctx.variable_maps.getNewContent(node.getScope.toString)
-        ctx.append(scope_value)
-      } else
+      if (isScopeExpand(node.getScope, ctx)){
         node.getScope.genCode(ctx, numsIntent)
-
+      } else {
+        if (ctx.isAbstract) {
+          val scope_value = ctx.variable_maps.getNewContent(node.getScope.toString)
+          ctx.append(scope_value)
+        } else
+          node.getScope.genCode(ctx, numsIntent)
+      }
       ctx.append(".")
 
       // filed
       if (ctx.isAbstract) {
-        val name = ctx.variable_maps.getNewContent(node.getName.asString())
+        val name = ctx.ident_maps.getNewContent(node.getName.asString())
         ctx.append(name)
       } else
         node.getName.genCode(ctx)
@@ -1059,7 +1097,7 @@ trait EnrichedTrees extends utils.Common {
           ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:ReferenceType  => tp.genCode(ctx, numsIntent)
-        case tp:UnknownType  =>{
+        case tp:UnknownType  => {
           ctx.append(if (ctx.isAbstract) ctx.type_maps.getNewContent(node.asString()) else node.asString())
         }
         case tp:PrimitiveType  =>{
@@ -1127,15 +1165,26 @@ trait EnrichedTrees extends utils.Common {
       val scope = node.getScope
       val name = node.getName
       val tps = node.getTypeArguments
-      //TODO with scope
-      if (scope.isPresent){
-        if (ctx.isAbstract)
-          ctx.append(ctx.ident_maps.getNewContent(scope.get().getNameAsString))
-        else
+
+      if (ctx.isAbstract) {
+        val value = (if (scope.isPresent) scope.get().asString() + "." else EmptyString) + name.asString()
+        ctx.append(ctx.type_maps.getNewContent(value))
+      } else {
+        if (scope.isPresent) {
           scope.get().genCode(ctx, numsIntent)
-        ctx.append(".")
+          ctx.append(".")
+        }
+        name.genCode(ctx, numsIntent)
       }
-      if (ctx.isAbstract) ctx.append(ctx.type_maps.getNewContent(name.asString())) else name.genCode(ctx, numsIntent)
+
+//      if (scope.isPresent){
+//        if (ctx.isAbstract)
+//          ctx.append(ctx.type_maps.getNewContent(scope.get().toString))
+//        else
+//          scope.get().genCode(ctx, numsIntent)
+//        ctx.append(".")
+//      }
+//      if (ctx.isAbstract) ctx.append(ctx.type_maps.getNewContent(name.asString())) else name.genCode(ctx, numsIntent)
 
       if (tps.isPresent){
         ctx.append("<")
@@ -1148,8 +1197,11 @@ trait EnrichedTrees extends utils.Common {
 
   implicit class genParameter(node:Parameter) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
+      val modifiers = node.getModifiers
       val tp = node.getType
       val name = node.getName
+
+      modifiers.foreach(_.genCode(ctx))
 
       tp.genCode(ctx, numsIntent)
 
@@ -1176,27 +1228,43 @@ trait EnrichedTrees extends utils.Common {
     }
   }
 
-  def expand_scope(ctx:Context, scope:Node):Unit = {
-    scope match {
-      case expr: MethodCallExpr => {
-        val expr_name = expr.getName
-        val expr_scope = expr.getScope
+  def isScopeExpand(scope:Node, ctx:Context):Boolean = {
+    getLastExpr(scope) match {
+      case node:NameExpr => ctx.variable_maps.contain(node.getNameAsString)
+      case node:MethodCallExpr => ctx.method_maps.contain(node.getNameAsString)
+      case node:ObjectCreationExpr => ctx.type_maps.contain(node.getType.asString())
+      case node:ClassOrInterfaceType => ctx.type_maps.contain(node.getNameAsString)
+      case _ => false
+    }
+  }
 
-        // method name
-        if (ctx.isAbstract) {
-          ctx.method_maps.getNewContent(expr_name.asString())
-        } else
-          expr_name.genCode(ctx)
-
-        if (expr_scope.isPresent) expand_scope(ctx, expr_scope.get())
-      }
-      case tp:ClassOrInterfaceType => {
-        val tp_name = tp.getName
-        val tp_scope = tp.getScope
-        if (tp_scope.isPresent) expand_scope(ctx, tp_scope.get())
-      }
-      case fd:FieldAccessExpr => {}
-      case _ =>{}
+  def getLastExpr(scope:Node):Node = scope match {
+    case expr:MethodCallExpr => {
+      if (expr.getScope.isPresent)
+        getLastExpr(expr.getScope.get())
+      else
+        return scope
+    }
+    case expr:MethodReferenceExpr => {
+      getLastExpr(expr.getScope)
+    }
+    case expr:ObjectCreationExpr => {
+      if (expr.getScope.isPresent)
+        getLastExpr(expr.getScope.get())
+      else
+        return scope
+    }
+    case expr:FieldAccessExpr => {
+      getLastExpr(expr.getScope)
+    }
+    case expr:ClassOrInterfaceType => {
+      if (expr.getScope.isPresent)
+        getLastExpr(expr.getScope.get())
+      else
+        return scope
+    }
+    case _ => {
+      return scope
     }
   }
 

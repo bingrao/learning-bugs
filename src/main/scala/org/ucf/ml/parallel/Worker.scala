@@ -20,6 +20,11 @@ class Worker(src_batch:List[String] = null,
   val javaPaser = new parser.JavaParser
   val ctx = new Context(idioms, granularity)
 
+//  if (logger.isDebugEnabled){
+//    ctx.setNewLine(true)
+//    ctx.setIsAbstract(true)
+//  }
+
   val batch_size = scala.math.min(src_batch.size, tgt_batch.size)
 
   def abstract_task(inputPath:String, mode:Value, granularity:Value = this.granularity) = {
@@ -29,9 +34,13 @@ class Worker(src_batch:List[String] = null,
 
     val cu = javaPaser.getComplationUnit(inputPath, granularity)
 
-    if (logger.isDebugEnabled) javaPaser.printAST(f"./log/work_${worker_id}_${mode}.Yaml", cu)
-
     javaPaser.addPositionWithGenCode(ctx, cu)
+
+    if (logger.isDebugEnabled) {
+      println(cu)
+      println(ctx.get_abstract.split("\n").last)
+      println("******************************************************\n")
+    }
   }
 
   def task(buggyPath:String, fixedPath:String) = {
@@ -51,10 +60,6 @@ class Worker(src_batch:List[String] = null,
     for (idx <- 0 until batch_size) {
       task(src_batch(idx), tgt_batch(idx))
     }
-
-    logger.debug(ctx.get_buggy_abstract)
-    logger.debug("********************************************************")
-    logger.debug(ctx.get_fixed_abstract)
     EmptyString
   }
   override def call(): String = job()

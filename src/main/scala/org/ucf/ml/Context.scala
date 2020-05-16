@@ -23,8 +23,13 @@ class Context(idioms:mutable.HashSet[String], granularity: Value = METHOD) exten
   private val buggy_abstract = new StringBuilder()
   private val fixed_abstract = new StringBuilder()
 
+  def get_abstract = this.getCurrentMode match {
+    case SOURCE => get_buggy_abstract
+    case TARGET => get_fixed_abstract
+  }
+
   /**/
-  private var isAddPostion = false
+  private var isAddPostion = true
   def setPosition(value:Boolean) = this.isAddPostion = value
 
   def attachePosition(content:String) = if (isAddPostion) f"${content}#${this.getNewPosition} " else f"${content} "
