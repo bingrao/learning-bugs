@@ -13,7 +13,7 @@ object App extends utils.Common {
 
     val config_path = args(0)
 
-    val worker = new parallel.Master()
+    val worker = new parallel.Master(config_path)
     worker.run()
   }
 }
