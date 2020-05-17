@@ -128,7 +128,7 @@
             <artifactId>javaparser-core</artifactId>
             <version>3.15.17</version>
         </dependency>
-        
+
         <!-- https://mvnrepository.com/artifact/org.json4s/json4s-native -->
         <dependency>
             <groupId>org.json4s</groupId>

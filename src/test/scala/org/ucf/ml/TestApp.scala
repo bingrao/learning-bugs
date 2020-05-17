@@ -32,5 +32,8 @@ class ScalaTestAPP {
     val cu = TestUtils.getComplationUnit(inputClass, CLASS, false)
     TestUtils.printAST(outPath=null, cu = cu, format = "ymal")
   }
-
+  @Test def testParallel(): Unit ={
+    val worker = new parallel.Master()
+    worker.run()
+  }
 }
