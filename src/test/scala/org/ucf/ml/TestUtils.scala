@@ -1,6 +1,6 @@
 package org.ucf.ml
 
-object TestUtils extends parser.JavaParser{
+trait TestUtils extends parser.JavaParser with utils.Common {
   // Load data idioms
   private val idioms = readIdioms()
   val ctx = new Context(idioms)

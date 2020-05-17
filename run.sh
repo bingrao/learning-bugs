@@ -41,6 +41,7 @@ ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${model}-${CurrentD
 case ${model} in
   "abstract")
     set -x
+    mvn assembly:assembly
     scala -Dlog4j.configuration=src/main/resources/log4j.properties target/learning-bugs-1.0-SNAPSHOT-jar-with-dependencies.jar ${RootPath}/src/main/resources/application.conf
   ;;
   "preprocess")

@@ -5,7 +5,7 @@ package org.ucf.ml
 import org.junit.Test
 import org.junit.Assert._
 
-class TestAbstract {
+class TestAbstract extends TestUtils {
   @Test def testAbstract() {
     val inputClass =
       """
@@ -28,16 +28,16 @@ class TestAbstract {
         |    }
         |}
         |""".stripMargin
-    TestUtils.get_abstract_code(inputClass, CLASS, false)
+    get_abstract_code(inputClass, CLASS, false)
   }
 
   @Test def testAbstractFile_68(): Unit ={
     val input = "data/raw/buggy/91.java"
-    TestUtils.get_abstract_code(input, METHOD, true)
+    get_abstract_code(input, METHOD, true)
   }
 
   @Test def testAbstractFile(): Unit ={
     val input = "data/1/buggy.java"
-    TestUtils.get_abstract_code(input, METHOD, true)
+    get_abstract_code(input, METHOD, true)
   }
 }

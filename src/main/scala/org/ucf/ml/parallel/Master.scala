@@ -92,9 +92,10 @@ class Master (configPath:String = "src/main/resources/application.conf") extends
     val srcFiles = getListOfFiles(srcPath)
     val tgtFiles = getListOfFiles(tgtPath)
 
-    srcFiles.foreach(f => logger.debug("Buggy-"+f.getName))
-    tgtFiles.foreach(f => logger.debug("Fixed-"+f.getName))
-
+    if (logger.isDebugEnabled) {
+      srcFiles.foreach(f => logger.debug("Buggy-" + f.getName))
+      tgtFiles.foreach(f => logger.debug("Fixed-" + f.getName))
+    }
 
     if (srcFiles.size != tgtFiles.size){
       logger.error(f"The sizes of source (${srcFiles.size}) and target (${tgtFiles}) do not match ...")

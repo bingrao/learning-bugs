@@ -3,9 +3,8 @@ package org.ucf.ml
   * @author
   */
 import org.junit.Test
-import org.junit.Assert._
 
-class ScalaTestAPP {
+class ScalaTestAPP extends TestUtils {
   @Test def testAdd() {
     val inputClass =
       """
@@ -29,11 +28,13 @@ class ScalaTestAPP {
         |}
         |""".stripMargin
 
-    val cu = TestUtils.getComplationUnit(inputClass, CLASS, false)
-    TestUtils.printAST(outPath=null, cu = cu, format = "ymal")
+    val cu = getComplationUnit(inputClass, CLASS, false)
+    printAST(outPath=null, cu = cu, format = "ymal")
   }
   @Test def testParallel(): Unit ={
-    val worker = new parallel.Master()
-    worker.run()
+    if (logger.isDebugEnabled) {
+      val worker = new parallel.Master()
+      worker.run()
+    }
   }
 }
