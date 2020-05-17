@@ -191,6 +191,7 @@ venv.bak/
 ./benchmarks/**/logs/
 ./benchmarks/**/data/
 data/
+log/
 
 # End of https://www.gitignore.io/api/eclipse
 
