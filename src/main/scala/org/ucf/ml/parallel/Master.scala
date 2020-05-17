@@ -11,7 +11,7 @@ import scala.collection.JavaConversions._
  * https://www.baeldung.com/java-executor-wait-for-threads
  * @param configPath
  */
-class Master (configPath:String = "src/main/resources/application.conf") extends utils.Common {
+class Master (configPath:String = "src/main/resources/default_application.conf") extends utils.Common {
 
   /* Load configurations from a file*/
   private val config = new Config(configPath)

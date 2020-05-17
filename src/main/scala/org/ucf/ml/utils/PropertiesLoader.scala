@@ -4,7 +4,7 @@ package utils
 import java.io.File
 import com.typesafe.config.ConfigFactory
 
-class PropertiesLoader(configPath:String = "src/main/resources/application.conf") {
+class PropertiesLoader(configPath:String = "src/main/resources/default_application.conf") {
 
   val parsedConfig = ConfigFactory.parseFile(new File(configPath))
 
