@@ -15,7 +15,7 @@ import scala.collection.mutable
 class Worker(src_batch:List[String] = null,
              tgt_batch:List[String] = null,
              idioms:mutable.HashSet[String],
-             worker_id:Int, granularity: Value = METHOD) extends Callable[String] with utils.Common{
+             worker_id:Int, granularity: Value = METHOD) extends Callable[Context] with utils.Common{
 
   val javaPaser = new parser.JavaParser
   val ctx = new Context(idioms, granularity)
@@ -29,18 +29,18 @@ class Worker(src_batch:List[String] = null,
 
   def abstract_task(inputPath:String, mode:Value, granularity:Value = this.granularity) = {
 
-    logger.debug(f"Worker ${worker_id} process ${mode} Source code ${inputPath}")
     ctx.setCurrentMode(mode)
 
     val cu = javaPaser.getComplationUnit(inputPath, granularity)
 
     javaPaser.addPositionWithGenCode(ctx, cu)
 
-    if (logger.isDebugEnabled) {
-      println(cu)
-      println(ctx.get_abstract.split("\n").last)
-      println("******************************************************\n")
-    }
+//    if (logger.isDebugEnabled) {
+//      logger.debug(f"Worker ${worker_id} process ${mode} Source code ${inputPath}")
+//      println(cu)
+//      println(ctx.get_abstract.split("\n").last)
+//      println("******************************************************\n")
+//    }
   }
 
   def task(buggyPath:String, fixedPath:String) = {
@@ -54,13 +54,15 @@ class Worker(src_batch:List[String] = null,
     ctx.clear
   }
 
-  def job() = {
-
+  def job(): Context = {
+    val start = System.currentTimeMillis()
     /*Iteration Executing task to handle with all involved in data*/
     for (idx <- 0 until batch_size) {
       task(src_batch(idx), tgt_batch(idx))
     }
-    EmptyString
+    val stop = System.currentTimeMillis()
+    logger.info(f"Worker ${worker_id} deal with ${batch_size} task in ${stop - start} milliseconds")
+    ctx
   }
-  override def call(): String = job()
+  override def call(): Context = job()
 }

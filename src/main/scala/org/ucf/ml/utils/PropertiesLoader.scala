@@ -10,8 +10,8 @@ class PropertiesLoader(configPath:String = "src/main/resources/application.conf"
 
   private val conf = ConfigFactory.load(parsedConfig)
 
-
   val getLogLevel = conf.getString("LogLevel")
+
 
   def getIdiomsPath = conf.getString("IdiomsPath")
   def getRawBuggyFilesDir = conf.getString("RawBuggyFilesDir")
