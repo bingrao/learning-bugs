@@ -1,9 +1,7 @@
 public class DummyClass {
 
-    public void onClick(android.view.View v) {
-        if (net.anei.cadpage.SmsPopupUtils.haveNet(this)) {
-            this.finish();
-        }
+    public byte getColumn(int x) {
+        return patterns[us.cownet.lamps.GreyscaleLampPattern.INDEX[cycleCount]].getColumn(x);
     }
 }
 ---
@@ -17,34 +15,41 @@ root(Type=CompilationUnit):
                 - member(Type=MethodDeclaration): 
                     body(Type=BlockStmt): 
                         statements: 
-                            - statement(Type=IfStmt): 
-                                condition(Type=MethodCallExpr): 
+                            - statement(Type=ReturnStmt): 
+                                expression(Type=MethodCallExpr): 
                                     name(Type=SimpleName): 
-                                        identifier: "haveNet"
-                                    scope(Type=FieldAccessExpr): 
-                                        name(Type=SimpleName): 
-                                            identifier: "SmsPopupUtils"
-                                        scope(Type=FieldAccessExpr): 
-                                            name(Type=SimpleName): 
-                                                identifier: "cadpage"
-                                            scope(Type=FieldAccessExpr): 
+                                        identifier: "getColumn"
+                                    scope(Type=ArrayAccessExpr): 
+                                        index(Type=ArrayAccessExpr): 
+                                            index(Type=NameExpr): 
                                                 name(Type=SimpleName): 
-                                                    identifier: "anei"
-                                                scope(Type=NameExpr): 
+                                                    identifier: "cycleCount"
+                                            name(Type=FieldAccessExpr): 
+                                                name(Type=SimpleName): 
+                                                    identifier: "INDEX"
+                                                scope(Type=FieldAccessExpr): 
                                                     name(Type=SimpleName): 
-                                                        identifier: "net"
+                                                        identifier: "GreyscaleLampPattern"
+                                                    scope(Type=FieldAccessExpr): 
+                                                        name(Type=SimpleName): 
+                                                            identifier: "lamps"
+                                                        scope(Type=FieldAccessExpr): 
+                                                            name(Type=SimpleName): 
+                                                                identifier: "cownet"
+                                                            scope(Type=NameExpr): 
+                                                                name(Type=SimpleName): 
+                                                                    identifier: "us"
+                                        name(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "patterns"
                                     arguments: 
-                                        - argument(Type=ThisExpr): 
-                                thenStmt(Type=BlockStmt): 
-                                    statements: 
-                                        - statement(Type=ExpressionStmt): 
-                                            expression(Type=MethodCallExpr): 
-                                                name(Type=SimpleName): 
-                                                    identifier: "finish"
-                                                scope(Type=ThisExpr): 
-                    type(Type=VoidType): 
+                                        - argument(Type=NameExpr): 
+                                            name(Type=SimpleName): 
+                                                identifier: "x"
+                    type(Type=PrimitiveType): 
+                        type: "BYTE"
                     name(Type=SimpleName): 
-                        identifier: "onClick"
+                        identifier: "getColumn"
                     modifiers: 
                         - modifier(Type=Modifier): 
                             keyword: "PUBLIC"
@@ -52,16 +57,9 @@ root(Type=CompilationUnit):
                         - parameter(Type=Parameter): 
                             isVarArgs: "false"
                             name(Type=SimpleName): 
-                                identifier: "v"
-                            type(Type=ClassOrInterfaceType): 
-                                name(Type=SimpleName): 
-                                    identifier: "View"
-                                scope(Type=ClassOrInterfaceType): 
-                                    name(Type=SimpleName): 
-                                        identifier: "view"
-                                    scope(Type=ClassOrInterfaceType): 
-                                        name(Type=SimpleName): 
-                                            identifier: "android"
+                                identifier: "x"
+                            type(Type=PrimitiveType): 
+                                type: "INT"
             modifiers: 
                 - modifier(Type=Modifier): 
                     keyword: "PUBLIC"

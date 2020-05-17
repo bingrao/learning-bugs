@@ -9,7 +9,10 @@ import com.github.javaparser.ast.expr.{FieldAccessExpr, MethodCallExpr, Name, Si
 import com.github.javaparser.ast.stmt._
 import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr._
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter
+
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 trait EnrichedTrees extends utils.Common {
 
@@ -707,7 +710,6 @@ trait EnrichedTrees extends utils.Common {
       val arguments = node.getArguments
 
       if (scope.isPresent) {
-
         if (isScopeExpand(scope.get(), ctx)){
           scope.get().genCode(ctx, numsIntent)
         } else {
@@ -805,7 +807,7 @@ trait EnrichedTrees extends utils.Common {
       }
       ctx.append("::")
 
-      if (ctx.isAbstract) ctx.append(ctx.variable_maps.getNewContent(ident)) else ctx.append(ident)
+      if (ctx.isAbstract) ctx.append(ctx.method_maps.getNewContent(ident)) else ctx.append(ident)
     }
   }
 
@@ -1228,44 +1230,123 @@ trait EnrichedTrees extends utils.Common {
     }
   }
 
-  def isScopeExpand(scope:Node, ctx:Context):Boolean = {
-    getLastExpr(scope) match {
-      case node:NameExpr => ctx.variable_maps.contain(node.getNameAsString)
-      case node:MethodCallExpr => ctx.method_maps.contain(node.getNameAsString)
-      case node:ObjectCreationExpr => ctx.type_maps.contain(node.getType.asString())
-      case node:ClassOrInterfaceType => ctx.type_maps.contain(node.getNameAsString)
+  /**
+   *  Collect all nodes have sub scope
+   *  Usage: ScopeNodeCollector().visit(node, new ListBuffer[Node])
+   */
+  case class ScopeNodeCollector() extends VoidVisitorAdapter[ListBuffer[Node]] {
+    private def hasScope(scope:Node):Boolean = scope match {
+      case _:MethodCallExpr => true
+      case _:MethodReferenceExpr => true
+      case _:ObjectCreationExpr => true
+      case _:FieldAccessExpr => true
+      case _:ClassOrInterfaceType => true
       case _ => false
     }
+
+    def visit(node:Node, c:ListBuffer[Node]): Unit = node match {
+      case n:MethodCallExpr => this.visit(n, c)
+      case n:MethodReferenceExpr => this.visit(n, c)
+      case n:ClassOrInterfaceType => this.visit(n,c)
+      case n:FieldAccessExpr => this.visit(n,c)
+    }
+
+    override def visit(n:MethodCallExpr, c:ListBuffer[Node]): Unit = {
+      c.+=(n)
+      if ((n.getScope.isPresent) && (!hasScope(n.getScope.get())))
+        c.+=(n.getScope.get())
+      super.visit(n,c)
+    }
+    override def visit(n:MethodReferenceExpr, c:ListBuffer[Node]): Unit = {
+      c.+=(n)
+      if (!hasScope(n.getScope))
+        c.+=(n.getScope)
+      super.visit(n,c)
+    }
+    override def visit(n:ClassOrInterfaceType, c:ListBuffer[Node]): Unit = {
+      c.+=(n)
+      if ((n.getScope.isPresent) && (!hasScope(n.getScope.get())))
+        c.+=(n.getScope.get())
+      super.visit(n,c)
+    }
+    override def visit(n:FieldAccessExpr, c:ListBuffer[Node]): Unit = {
+      c.+=(n)
+      if (!hasScope(n.getScope))
+        c.+=(n.getScope)
+      super.visit(n,c)
+    }
   }
 
-  def getLastExpr(scope:Node):Node = scope match {
-    case expr:MethodCallExpr => {
-      if (expr.getScope.isPresent)
-        getLastExpr(expr.getScope.get())
-      else
-        return scope
-    }
-    case expr:MethodReferenceExpr => {
-      getLastExpr(expr.getScope)
-    }
-    case expr:ObjectCreationExpr => {
-      if (expr.getScope.isPresent)
-        getLastExpr(expr.getScope.get())
-      else
-        return scope
-    }
-    case expr:FieldAccessExpr => {
-      getLastExpr(expr.getScope)
-    }
-    case expr:ClassOrInterfaceType => {
-      if (expr.getScope.isPresent)
-        getLastExpr(expr.getScope.get())
-      else
-        return scope
-    }
-    case _ => {
-      return scope
-    }
+  def isScopeExpand(scope:Node, ctx:Context):Boolean = {
+    val allPaths = new ListBuffer[Node]
+    getAllScopePath(scope, allPaths)
+
+//    if (logger.isDebugEnabled) {
+    ////      val scope_name = getScopeNodeName(scope)
+    ////      for (elem <- allPaths) {
+    ////        val name = getScopeNodeName(elem)
+    ////        logger.debug(f"${scope_name} - ${name} ############## ${elem.getClass}")
+    ////      }
+    ////    }
+
+    /**
+     * If scope is a format of method call, then we need to expand it,
+     * such as a.b().c
+     */
+    if (allPaths.head.isInstanceOf[MethodCallExpr])
+      return true
+
+    /** If scope is a format of array access, then we need to expand it
+     *  such as a[index].b
+     * */
+    if (allPaths.head.isInstanceOf[ArrayAccessExpr])
+      return true
+
+    /**
+     * Along with scope data path, if exist one of nodes' name is already
+     * defined, then we need to expand it.
+     *
+     * such as: a.b.c() --> a or b is defined
+     */
+    allPaths.toList.map(node => node match {
+      case node:NameExpr => ctx.variable_maps.contain(node.getNameAsString)
+      case node:MethodCallExpr => ctx.method_maps.contain(node.getNameAsString)
+      case expr:MethodReferenceExpr => ctx.method_maps.contain(expr.getIdentifier)
+      case node:ObjectCreationExpr => ctx.type_maps.contain(node.getType.asString())
+      case node:FieldAccessExpr => ctx.ident_maps.contain(node.getNameAsString)
+      case node:ClassOrInterfaceType => ctx.type_maps.contain(node.getNameAsString)
+      case _ => false
+    }).reduce(_ || _)
   }
 
+  def getScopeNodeName(scope:Node):String = scope match {
+    case expr:MethodCallExpr => expr.getNameAsString
+    case expr:MethodReferenceExpr => expr.getIdentifier
+    case expr:ObjectCreationExpr => expr.getType.getNameAsString
+    case expr:FieldAccessExpr => expr.getNameAsString
+    case expr:ClassOrInterfaceType => expr.getNameAsString
+    case node:NameExpr => node.getNameAsString
+    case _ => f"[Error]-${scope}"
+  }
+
+
+  def getAllScopePath(scope:Node, collector:ListBuffer[Node]):Unit = {
+    collector.+=(scope)
+    val node = scope match {
+      case expr:MethodCallExpr => {
+        if (expr.getScope.isPresent) expr.getScope.get() else null
+      }
+      case expr:MethodReferenceExpr => expr.getScope
+      case expr:ObjectCreationExpr => {
+        if (expr.getScope.isPresent) expr.getScope.get() else null
+      }
+      case expr:FieldAccessExpr => expr.getScope
+      case expr:ClassOrInterfaceType => {
+        if (expr.getScope.isPresent) expr.getScope.get() else null
+      }
+      case _ => null
+    }
+    if (node != null)
+      getAllScopePath(node, collector)
+  }
 }

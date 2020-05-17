@@ -29,7 +29,7 @@ class Context(idioms:mutable.HashSet[String], granularity: Value = METHOD) exten
   }
 
   /**/
-  private var isAddPostion = true
+  private var isAddPostion = false
   def setPosition(value:Boolean) = this.isAddPostion = value
 
   def attachePosition(content:String) = if (isAddPostion) f"${content}#${this.getNewPosition} " else f"${content} "
