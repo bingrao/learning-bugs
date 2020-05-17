@@ -34,15 +34,20 @@ class Master (configPath:String = "src/main/resources/default_application.conf")
 
       val total_files_nums = math.min(buggy_files.size, fixed_files.size)
 
+
       // Calcuate nums of files would be processed by a worker
       val batch_size = total_files_nums / nums_worker + 1
+
+      logger.info(f"The total buggy/fixed files is ${total_files_nums}, " +
+        f"#of Workers ${nums_worker}, batch size ${batch_size}")
+
 
       // Create workers with allocated data
       val workers  = for (index <- 0 until nums_worker) yield {
 
         val start = index*batch_size
         val end = if (index == nums_worker - 1) total_files_nums else (index + 1) * batch_size
-
+        logger.info(f"Create a new worker [${index}] to handle Java file indexed from ${start+1} to ${end}")
         new Worker(src_batch = buggy_files.slice(start, end),
           tgt_batch = fixed_files.slice(start, end),
           idioms=project_idioms,
@@ -60,14 +65,25 @@ class Master (configPath:String = "src/main/resources/default_application.conf")
         workers.map(_.call())
       }
 
-      val buggy_abstract = results.map(_.get_buggy_abstract).mkString(EmptyString)
-      val fixed_abstract = results.map(_.get_fixed_abstract).mkString(EmptyString)
+      val buggy_abstract = results.map(_.get_buggy_abstract).mkString("\n")
+      val fixed_abstract = results.map(_.get_fixed_abstract).mkString("\n")
 
+      if (logger.isDebugEnabled) {
+        val buggy_files = buggy_abstract.split("\n").map(_.split("\t").head)
+        val fixed_files = fixed_abstract.split("\n").map(_.split("\t").head)
 
+        val files = (buggy_files zip fixed_files).filter{ case (src, tgt) => src != tgt }
+
+        if (!files.isEmpty){
+          files.foreach{
+            case (src, tgt) => logger.error(f"[Ouput]-${src} != ${tgt}")
+          }
+          System.exit(-1)
+        }
+      }
 
       write(getConfig.getOutputBuggyDir+"buggy.txt", buggy_abstract)
       write(getConfig.getOutputBuggyDir+"fixed.txt", fixed_abstract)
-
 
     } catch  {
       case e: FileNotFoundException => {
@@ -92,10 +108,8 @@ class Master (configPath:String = "src/main/resources/default_application.conf")
     val srcFiles = getListOfFiles(srcPath)
     val tgtFiles = getListOfFiles(tgtPath)
 
-    if (logger.isDebugEnabled) {
-      srcFiles.foreach(f => logger.debug("Buggy-" + f.getName))
-      tgtFiles.foreach(f => logger.debug("Fixed-" + f.getName))
-    }
+    logger.info(f"Loading ${srcFiles.size} java files from ${srcPath}")
+    logger.info(f"Loading ${tgtFiles.size} java files from ${tgtPath}")
 
     if (srcFiles.size != tgtFiles.size){
       logger.error(f"The sizes of source (${srcFiles.size}) and target (${tgtFiles}) do not match ...")
@@ -105,9 +119,8 @@ class Master (configPath:String = "src/main/resources/default_application.conf")
     val files = (srcFiles zip tgtFiles).filter{
       case (src, tgt) => src.getName != tgt.getName}
 
-    if (!files.isEmpty){
-      logger.error("The input source and target files does not match ...")
-      files.foreach(println _)
+    if (files.size != 0){
+      files.foreach{case (src, tgt) => logger.error(f"[Check]-${src} != ${tgt}")}
       System.exit(-1)
     }
 

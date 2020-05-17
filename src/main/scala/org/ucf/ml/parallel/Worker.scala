@@ -4,6 +4,7 @@ package parallel
 
 import java.util.concurrent.Callable
 import scala.collection.mutable
+import java.io.File
 
 /**
  *
@@ -26,36 +27,32 @@ class Worker(src_batch:List[String] = null,
 
     ctx.setCurrentMode(mode)
 
-//    if (logger.isDebugEnabled) ctx.append(inputPath + "\t")
+    if (logger.isDebugEnabled) ctx.append(s"[${worker_id}]-${new File(inputPath).getName}\t")
 
     val cu = javaPaser.getComplationUnit(inputPath, granularity)
 
     javaPaser.addPositionWithGenCode(ctx, cu)
-
-//    if (logger.isDebugEnabled) {
-//      logger.debug(f"Worker ${worker_id} process ${mode} Source code ${inputPath}")
-//      println(cu)
-//      println(ctx.get_abstract.split("\n").last)
-//      println("******************************************************\n")
-//    }
   }
 
-  def task(buggyPath:String, fixedPath:String) = {
+  def task(buggyPath:String, fixedPath:String, last:Boolean=false) = {
 
+    if ((logger.isDebugEnabled) && (new File(buggyPath).getName != new File(fixedPath).getName)) {
+      logger.error(s"[Input]-${buggyPath} != ${fixedPath}")
+    }
     abstract_task(buggyPath, SOURCE)
     abstract_task(fixedPath, TARGET)
 
     /*Dumpy buggy and fixed abstract code to a specify file*/
 
     /*Clear the context and */
-    ctx.clear
+    if (!last) ctx.clear
   }
 
   def job(): Context = {
     val start = System.currentTimeMillis()
     /*Iteration Executing task to handle with all involved in data*/
     for (idx <- 0 until batch_size) {
-      task(src_batch(idx), tgt_batch(idx))
+      task(src_batch(idx), tgt_batch(idx), idx == batch_size - 1)
     }
     val stop = System.currentTimeMillis()
     logger.info(f"Worker ${worker_id} deal with ${batch_size} task in ${stop - start} milliseconds")

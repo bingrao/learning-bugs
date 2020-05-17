@@ -32,9 +32,7 @@ class ScalaTestAPP extends TestUtils {
     printAST(outPath=null, cu = cu, format = "ymal")
   }
   @Test def testParallel(): Unit ={
-    if (logger.isDebugEnabled) {
-      val worker = new parallel.Master()
-      worker.run()
-    }
+    val worker = new parallel.Master()
+    worker.run()
   }
 }

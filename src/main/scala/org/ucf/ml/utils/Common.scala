@@ -20,6 +20,12 @@ trait Common {
   def getListOfFiles(dir: String):List[File] = {
     val d = new File(dir)
     if (d.exists && d.isDirectory) {
+      val allFiles = d.listFiles
+      logger.info(s"Get ${allFiles.size} files in directory ${dir}")
+
+      val notFiles = allFiles.filter(!_.isFile)
+      notFiles.foreach(file => logger.info("Not a file:" + file.getPath))
+
       d.listFiles
         .sortBy(_.getName.split("\\.").head.toInt)(ord = Ordering[Int])
         .filter(_.isFile).toList

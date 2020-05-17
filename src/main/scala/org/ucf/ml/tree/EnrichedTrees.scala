@@ -154,7 +154,7 @@ trait EnrichedTrees extends utils.Common {
         case n: TypeDeclaration[_] => n.genCode(ctx, numsIntent)
         case n: EnumConstantDeclaration => {n.genCode(ctx, numsIntent)}
         case n: AnnotationMemberDeclaration => {n.genCode(ctx, numsIntent)}
-        case n: CallableDeclaration[_] => {n.genCode(ctx, numsIntent)}
+        case n: CallableDeclaration[_] => n.genCode(ctx, numsIntent)
       }
     }
   }
@@ -205,17 +205,46 @@ trait EnrichedTrees extends utils.Common {
   implicit class genCallableDeclaration(node:CallableDeclaration[_]){
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
       node match {
-        //TODO, no implmentation [[ConstructorDeclaration]] for learning bugs
-        case n: ConstructorDeclaration => {n.genCode(ctx, numsIntent)}
-        case n: MethodDeclaration => {n.genCode(ctx, numsIntent)}
+        case n: ConstructorDeclaration => n.genCode(ctx, numsIntent)
+        case n: MethodDeclaration => n.genCode(ctx, numsIntent)
       }
     }
   }
 
   implicit class genConstructorDeclaration(node:ConstructorDeclaration) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      //TODO, no implmentation for learning bugs
-      ctx.append(node.toString, numsIntent)
+//      node.getAccessSpecifier
+      node.getModifiers.foreach(_.genCode(ctx, numsIntent))
+
+      node.getTypeParameters.foreach(_.genCode(ctx, numsIntent))
+
+      /*Method name, such as hello*/
+      if (ctx.isAbstract)
+        ctx.append(ctx.method_maps.getNewContent(node.getNameAsString))
+      else
+        node.getName.genCode(ctx)
+
+      /*formal paramters*/
+      ctx.append("(")
+      val parameters = node.getParameters
+      parameters.foreach(p => {
+        p.genCode(ctx, numsIntent)
+        if (p != parameters.last) ctx.append(",")
+      })
+      ctx.append(")")
+
+      val exceptions = node.getThrownExceptions
+      if (exceptions.size() != 0) {
+        if (ctx.isAbstract)
+          ctx.append(ctx.ident_maps.getNewContent("throws"))
+        else
+          ctx.append("throws")
+        node.getThrownExceptions.foreach(exp => {
+          exp.genCode(ctx)
+          if (exp != exceptions.last) ctx.append(",")
+        })
+      }
+      node.getBody.genCode(ctx, numsIntent)
     }
   }
 
