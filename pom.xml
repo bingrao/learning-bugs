@@ -77,37 +77,13 @@
 			<artifactId>scalatest_${scala.binary.version}</artifactId>
 			<version>3.2.0-M1</version>
 		</dependency>
+        
 
         <!-- https://mvnrepository.com/artifact/log4j/log4j -->
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
-            <version>4.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-        </dependency>
-
-
-        <!-- https://mvnrepository.com/artifact/log4j/log4j -->
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-
-        <dependency>
-            <groupId>fr.inria.gforge.spoon</groupId>
-            <artifactId>spoon-core</artifactId>
-            <version>8.1.0</version>
         </dependency>
 
 
@@ -129,19 +105,6 @@
             <version>3.15.17</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.json4s/json4s-native -->
-        <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-native_2.11</artifactId>
-            <version>3.6.7</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.json4s/json4s-core -->
-        <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-core_2.11</artifactId>
-            <version>3.6.7</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -149,13 +112,6 @@
             <version>3.0</version>
         </dependency>
 
-
-        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.5</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.typesafe/config -->
         <dependency>
