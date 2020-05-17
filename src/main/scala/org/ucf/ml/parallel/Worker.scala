@@ -20,16 +20,13 @@ class Worker(src_batch:List[String] = null,
   val javaPaser = new parser.JavaParser
   val ctx = new Context(idioms, granularity)
 
-//  if (logger.isDebugEnabled){
-//    ctx.setNewLine(true)
-//    ctx.setIsAbstract(true)
-//  }
-
   val batch_size = scala.math.min(src_batch.size, tgt_batch.size)
 
   def abstract_task(inputPath:String, mode:Value, granularity:Value = this.granularity) = {
 
     ctx.setCurrentMode(mode)
+
+    if (logger.isDebugEnabled) ctx.append(inputPath + "\t")
 
     val cu = javaPaser.getComplationUnit(inputPath, granularity)
 
