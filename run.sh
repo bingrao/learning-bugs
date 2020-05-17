@@ -2,7 +2,7 @@
 
 if [ "$#" -ne 2 ] ; then
   echo "Missing Parameters ..."
-  echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[preprocess|train|predict|val] " >&2
+  echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[abstract|preprocess|train|predict|val] " >&2
   exit 1
 fi
 CurrentDate=$(date +%F)
@@ -13,7 +13,7 @@ CurrentDate=$(date +%F)
 #ProjectName="learning_fix"
 ProjectName=$1
 
-# preprocess|train|predict|val
+# abstract|preprocess|train|predict|val
 model=$2
 
 # Root envs
@@ -39,6 +39,10 @@ ProjectLog=${ProjectBechmarks}/logs/${model}-${CurrentDate}.log
 ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${model}-${CurrentDate}.pth
 
 case ${model} in
+  "abstract")
+    set -x
+    scala -Dlog4j.configuration=src/main/resources/log4j.properties target/learning-bugs-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/application.con
+  ;;
   "preprocess")
       set -x
       python "${ProjectBechmarks}"/preprocess.py \
