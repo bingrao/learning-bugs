@@ -844,7 +844,7 @@ trait EnrichedTrees extends utils.Common {
 
   implicit class genSwitchEntry(node:SwitchEntry) {
     def genCode(ctx:Context, numsIntent:Int=0):Unit = {
-      val tp = node.getType.asInstanceOf[Int]
+      //TODO
       val lables = node.getLabels
       val sts = node.getStatements
 
