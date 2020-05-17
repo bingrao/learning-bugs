@@ -32,12 +32,12 @@ class TestAbstract extends TestUtils {
   }
 
   @Test def testAbstractFile_68(): Unit ={
-    val input = "data/raw/buggy/91.java"
+    val input = "src/data/raw/buggy/91.java"
     get_abstract_code(input, METHOD, true)
   }
 
   @Test def testAbstractFile(): Unit ={
-    val input = "data/1/buggy.java"
+    val input = "src/data/1/buggy.java"
     get_abstract_code(input, METHOD, true)
   }
 }
