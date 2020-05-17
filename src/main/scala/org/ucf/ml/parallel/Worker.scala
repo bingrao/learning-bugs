@@ -26,7 +26,7 @@ class Worker(src_batch:List[String] = null,
 
     ctx.setCurrentMode(mode)
 
-    if (logger.isDebugEnabled) ctx.append(inputPath + "\t")
+//    if (logger.isDebugEnabled) ctx.append(inputPath + "\t")
 
     val cu = javaPaser.getComplationUnit(inputPath, granularity)
 
