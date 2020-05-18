@@ -7,7 +7,7 @@
   "num_candidates": 3,
   "positional_encoding": true,
   "d_model": 128,
-  "layers_count": 1,
+  "layers_count": 2,
   "heads_count": 8,
   "d_ff": 128,
   "dropout": 0.1,

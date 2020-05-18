@@ -2,7 +2,7 @@
 
 if [ "$#" -ne 2 ] ; then
   echo "Missing Parameters ..."
-  echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[abstract|preprocess|train|predict|val] " >&2
+  echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[abstract|preprocess|train|predict|eval] " >&2
   exit 1
 fi
 CurrentDate=$(date +%F)
@@ -13,7 +13,7 @@ CurrentDate=$(date +%F)
 #ProjectName="learning_fix"
 ProjectName=$1
 
-# abstract|preprocess|train|predict|val
+# abstract|preprocess|train|predict|eval
 model=$2
 
 # Root envs
@@ -36,7 +36,7 @@ ProjectConfig=${ProjectBechmarks}/configs/default_config.json
 ProjectLog=${ProjectBechmarks}/logs/${model}-${CurrentDate}.log
 
 # Default Checkpoint file
-ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${model}-${CurrentDate}.pth
+ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${ProjectName}.pth
 
 case ${model} in
   "abstract")
@@ -68,7 +68,7 @@ case ${model} in
                                       --debug=False \
                                       --phase="${model}" \
                                       --device='cuda' \
-                                      --device_id=[0]
+                                      --device_id=[1]
 
   ;;
   "predict")
@@ -82,9 +82,12 @@ case ${model} in
                               --project_checkpoint="${ProjectCheckpoint}" \
                               --debug=False \
                               --phase="${model}" \
+                              --device='cuda' \
+                              --device_id=[1] \
                               --source="There is an imbalance here ."
+
   ;;
-  "val")
+  "eval")
       set -x
       python "${ProjectBechmarks}"/evaluate.py \
                               --project_name="${ProjectName}" \
@@ -99,7 +102,7 @@ case ${model} in
   ;;
    *)
      echo "There is no match case for ${model}"
-     echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[preprocess|train|predict|val] " >&2
+     echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[preprocess|train|predict|eval] " >&2
      exit 1
   ;;
 esac
