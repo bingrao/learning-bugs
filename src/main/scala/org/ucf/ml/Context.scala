@@ -16,13 +16,6 @@ class Context(idioms:mutable.HashSet[String], granularity: Value = METHOD) exten
   def getCurrentMode = this.current_mode
   def setCurrentMode(target:Value) = {
     this.position_offset.set(0)
-//    target match {
-//      case SOURCE => this.buggy_abstract.append ("\n")
-//      case TARGET => this.fixed_abstract.append ("\n")
-//    }
-
-
-
     this.current_mode = target
   }
 

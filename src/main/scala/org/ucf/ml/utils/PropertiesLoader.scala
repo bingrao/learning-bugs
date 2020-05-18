@@ -21,6 +21,9 @@ class PropertiesLoader(configPath:String = "src/main/resources/default_applicati
   def getOutputFixedDir = conf.getString("OutputFixedDir")
 
   def getNumsWorker = conf.getInt("NumsWorker")
+
   def getIsParallel = conf.getBoolean("IsParallel")
+
+  def getIsSplitData = conf.getBoolean("IsSplitData")
 
 }

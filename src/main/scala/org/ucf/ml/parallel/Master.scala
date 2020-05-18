@@ -65,25 +65,53 @@ class Master (configPath:String = "src/main/resources/default_application.conf")
         workers.map(_.call())
       }
 
-      val buggy_abstract = results.map(_.get_buggy_abstract).mkString("\n")
-      val fixed_abstract = results.map(_.get_fixed_abstract).mkString("\n")
+      val buggy_abstract = results.map(_.get_buggy_abstract).flatMap(_.split("\n")).toList
+      val fixed_abstract = results.map(_.get_fixed_abstract).flatMap(_.split("\n")).toList
+
 
       if (logger.isDebugEnabled) {
-        val buggy_files = buggy_abstract.split("\n").map(_.split("\t").head)
-        val fixed_files = fixed_abstract.split("\n").map(_.split("\t").head)
+        val buggy_files = buggy_abstract.map(_.split("\t").head)
+        val fixed_files = fixed_abstract.map(_.split("\t").head)
 
         val files = (buggy_files zip fixed_files).filter{ case (src, tgt) => src != tgt }
 
         if (!files.isEmpty){
-          files.foreach{
+          files.foreach {
             case (src, tgt) => logger.error(f"[Ouput]-${src} != ${tgt}")
           }
           System.exit(-1)
         }
       }
 
-      write(getConfig.getOutputBuggyDir+"buggy.txt", buggy_abstract)
-      write(getConfig.getOutputBuggyDir+"fixed.txt", fixed_abstract)
+
+      if (config.getIsSplitData) {
+        import scala.util.Random
+        val random = new Random(100)
+
+        val nums_train = buggy_abstract.size * 0.8
+        val nums_test = buggy_abstract.size * 0.1
+
+        val train_buggy = random.shuffle(buggy_abstract).take(nums_train.toInt)
+        val train_fixed = random.shuffle(fixed_abstract).take(nums_train.toInt)
+        write(getConfig.getOutputBuggyDir+"train/buggy.txt", train_buggy.mkString("\n"))
+        write(getConfig.getOutputBuggyDir+"train/fixed.txt", train_fixed.mkString("\n"))
+
+
+        val test_buggy = random.shuffle(buggy_abstract diff train_buggy).take(nums_test.toInt)
+        val test_fixed = random.shuffle(fixed_abstract diff train_fixed).take(nums_test.toInt)
+        write(getConfig.getOutputBuggyDir+"test/buggy.txt", test_buggy.mkString("\n"))
+        write(getConfig.getOutputBuggyDir+"test/fixed.txt", test_fixed.mkString("\n"))
+
+
+        val eval_buggy = buggy_abstract diff train_buggy diff test_buggy
+        val eval_fixed = fixed_abstract diff train_fixed diff test_fixed
+        write(getConfig.getOutputBuggyDir+"eval/buggy.txt", eval_buggy.mkString("\n"))
+        write(getConfig.getOutputBuggyDir+"eval/fixed.txt", eval_fixed.mkString("\n"))
+
+      }
+
+      write(getConfig.getOutputBuggyDir+"total/buggy.txt", buggy_abstract.mkString("\n"))
+      write(getConfig.getOutputBuggyDir+"total/fixed.txt", fixed_abstract.mkString("\n"))
 
     } catch  {
       case e: FileNotFoundException => {

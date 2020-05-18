@@ -12,6 +12,9 @@ trait Common {
   val logger = new Logging(this.getClass.getName)
 
   def write(path:String, context:String) = {
+    val p = (new File(path)).getParentFile
+    if (!p.exists()) p.mkdir()
+
     val printWriter = new PrintWriter(new FileWriter(path))
     printWriter.print(context)
     printWriter.close()
