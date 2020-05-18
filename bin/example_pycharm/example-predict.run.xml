@@ -1,0 +1,23 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="example-predict" type="PythonConfigurationType" factoryName="Python">
+    <module name="learning-bugs" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <env name="PYTHONUNBUFFERED" value="1" />
+    </envs>
+    <option name="SDK_HOME" value="" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="IS_MODULE_SDK" value="true" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="false" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/benchmarks/example/predict.py" />
+    <option name="PARAMETERS" value="--project_name example --project_config $PROJECT_DIR$/benchmarks/example/configs/default_config.json --project_raw_dir $PROJECT_DIR$/benchmarks/example/data --project_processed_dir $PROJECT_DIR$/benchmarks/example/processed --project_log $PROJECT_DIR$/benchmarks/example/logs/predict-2020-05-18.log --project_checkpoint $PROJECT_DIR$/benchmarks/example/checkpoints/checkpoint-example.pth --debug False --phase predict --device cuda --device_id [1] --source=&quot;There is an imbalance here.&quot;" />
+    <option name="SHOW_COMMAND_LINE" value="false" />
+    <option name="EMULATE_TERMINAL" value="false" />
+    <option name="MODULE_MODE" value="false" />
+    <option name="REDIRECT_INPUT" value="false" />
+    <option name="INPUT_FILE" value="" />
+    <method v="2" />
+  </configuration>
+</component>
