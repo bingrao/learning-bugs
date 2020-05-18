@@ -7,6 +7,9 @@ from tqdm import tqdm
 from nmt.utils.context import Context
 import os
 
+import warnings
+warnings.filterwarnings('ignore')
+
 class Evaluator:
     def __init__(self, pred=None, save_filepath=None):
 
@@ -19,7 +22,7 @@ class Evaluator:
 
         predictions = []
         for source, target in tqdm(test_dataset):
-            prediction = self.predictor.predict_one(source, num_candidates=1)[0]
+            prediction = self.predictor.predict_one(source=source, num_candidates=1)[0]
             predictions.append(prediction)
 
         hypotheses = [tokenize(prediction) for prediction in predictions]
@@ -49,13 +52,13 @@ if __name__ == "__main__":
     logger = context.logger
 
     logger.info('Constructing dictionaries...')
-    source_dictionary = IndexDictionary.load(context.proj_processed_dir,
+    source_dictionary = IndexDictionary.load(context.project_processed_dir,
                                              mode='source',
                                              vocabulary_size=context.vocabulary_size)
-    target_dictionary = IndexDictionary.load(context.proj_processed_dir,
+    target_dictionary = IndexDictionary.load(context.project_processed_dir,
                                              mode='target',
                                              vocabulary_size=context.vocabulary_size)
-    
+
 
     logger.info('Building model...')
     model = build_model(context, source_dictionary.vocabulary_size, target_dictionary.vocabulary_size)
@@ -79,5 +82,5 @@ if __name__ == "__main__":
     logger.info('Evaluating...')
     test_datasets = TranslationDataset(context, context.phase, limit=1000)
     bleu_score = evaluator.evaluate_dataset(test_datasets)
-    logger.info('Evaluation time :', datetime.now() - timestamp)
-    logger.info("BLEU score :", bleu_score)
+    logger.info('Evaluation time : %d s', (datetime.now() - timestamp).seconds)
+    logger.info("BLEU score : %f ", bleu_score)

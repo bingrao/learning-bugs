@@ -5,9 +5,12 @@ from benchmarks.example.datasets import IndexedInputTargetTranslationDataset, In
 from nmt.utils.context import Context
 from nmt.utils.pad import subsequent_mask, pad_masking, subsequent_masking
 
+import warnings
+warnings.filterwarnings('ignore')
 
 class Beam:
-    def __init__(self, ctx=None, beam_size=8, min_length=0, n_top=1, ranker=None,
+
+    def __init__(self, ctx=None, beam_size=4, min_length=0, n_top=1, ranker=None,
                  start_token_id=2, end_token_id=3):
         self.context = ctx
         self.beam_size = beam_size
@@ -18,7 +21,7 @@ class Beam:
         self.top_sentence_ended = False
 
         self.prev_ks = []
-        self.next_ys = [torch.LongTensor(beam_size).fill_(start_token_id)]  # remove padding
+        self.next_ys = [torch.LongTensor(beam_size).fill_(start_token_id)] # remove padding
 
         self.current_scores = torch.FloatTensor(beam_size).zero_()
         self.all_scores = []
@@ -66,10 +69,8 @@ class Beam:
 
         self.prev_ks.append(prev_k)
         self.next_ys.append(next_y)
-
         # for RNN, dim=1 and for transformer, dim=0.
-        # (target_seq_len=1, beam_size, source_seq_len)
-        prev_attention = current_attention.index_select(dim=0, index=prev_k)
+        prev_attention = current_attention.index_select(dim=0, index=prev_k)  # (target_seq_len=1, beam_size, source_seq_len)
         self.all_attentions.append(prev_attention)
 
 
@@ -82,11 +83,11 @@ class Beam:
             self.top_sentence_ended = True
 
     def get_current_state(self):
-        """Get the outputs for the current timestep."""
+        "Get the outputs for the current timestep."
         return self.next_ys[-1]
 
     def get_current_origin(self):
-        """Get the backpointers for the current timestep."""
+        "Get the backpointers for the current timestep."
         return self.prev_ks[-1]
 
     def done(self):
@@ -128,7 +129,7 @@ def make_std_mask(tgt, pad):
 
 
 class Predictor:
-    def __init__(self, ctx, m, src_dictionary, tgt_dictionary, max_length=30, beam_size=8):
+    def __init__(self, ctx, m, src_dictionary, tgt_dictionary, max_length=30, beam_size=4):
         self.context = ctx
         self.logger = ctx.logger
         self.model = m
@@ -165,16 +166,17 @@ class Predictor:
 
 
     def predict_one(self, source=None, num_candidates=None):
-        source = self.context.source if source is None else None
-        num_candidates = self.context.num_candidates if num_candidates is None else None
-        self.logger.debug("[%s] Predict Input Source: %s, nums of Candidates %d", self.__class__.__name__,
+        source = self.context.source if source is None else source
+
+        num_candidates = self.context.num_candidates if num_candidates is None else num_candidates
+        self.logger.debug("[%s] Predict Input Source: %s, nums of Candidnum_candidatesates %d", self.__class__.__name__,
                           str(source), num_candidates)
 
         source_preprocessed = self.preprocess(source)
         self.logger.debug("[%s] The corresponding indexes of [%s]: %s", self.__class__.__name__,
                           str(source), str(source_preprocessed))
 
-        source_tensor = torch.tensor(source_preprocessed).unsqueeze(0)  # why unsqueeze?
+        source_tensor = torch.tensor(source_preprocessed).unsqueeze(0)
         length_tensor = torch.tensor(len(source_preprocessed)).unsqueeze(0)
         self.logger.debug("[%s] The index source Tensor: %s, lenght %s", self.__class__.__name__,
                           source_tensor, length_tensor)
@@ -185,7 +187,8 @@ class Predictor:
         self.logger.debug("[%s] Encoder Source %s, Output %s dimensions", self.__class__.__name__,
                           source_tensor.size(), memory.size())
 
-        memory_mask = sources_mask
+        memory_mask = pad_masking(source_tensor, 1)
+        # memory_mask = sources_mask
 
         # Repeat beam_size times
         # (beam_size, seq_len, hidden_size)
