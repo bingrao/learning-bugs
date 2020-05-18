@@ -2,7 +2,7 @@
 
 if [ "$#" -ne 2 ] ; then
   echo "Missing Parameters ..."
-  echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[abstract|preprocess|train|predict|eval] " >&2
+  echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[abstract|preprocess|train|predict|val] " >&2
   exit 1
 fi
 CurrentDate=$(date +%F)
@@ -13,7 +13,7 @@ CurrentDate=$(date +%F)
 #ProjectName="learning_fix"
 ProjectName=$1
 
-# abstract|preprocess|train|predict|eval
+# abstract|preprocess|train|predict|val
 model=$2
 
 # Root envs
@@ -87,7 +87,7 @@ case ${model} in
                               --source="There is an imbalance here ."
 
   ;;
-  "eval")
+  "val")
       set -x
       python "${ProjectBechmarks}"/evaluate.py \
                               --project_name="${ProjectName}" \
@@ -102,7 +102,7 @@ case ${model} in
   ;;
    *)
      echo "There is no match case for ${model}"
-     echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[preprocess|train|predict|eval] " >&2
+     echo "Usage: $0 project[dummy|example|spacy|learning_fix] model[preprocess|train|predict|val] " >&2
      exit 1
   ;;
 esac

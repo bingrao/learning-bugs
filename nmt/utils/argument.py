@@ -12,7 +12,7 @@ def get_main_argument(desc='Train Transformer'):
     parser.add_argument('--project_log', type=str, required=True, default="")
     parser.add_argument('--project_save_config', type=bool, default=False)
     parser.add_argument('--project_checkpoint', type=str, default="")
-    parser.add_argument('--phase', type=str, required=True, choices=['preprocess', 'train', 'predict', 'eval'], default='train')
+    parser.add_argument('--phase', type=str, required=True, choices=['preprocess', 'train', 'predict', 'val'], default='train')
     parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu')
     parser.add_argument('--device_id', type=list, default=[0])
     # Predict input source sentence
