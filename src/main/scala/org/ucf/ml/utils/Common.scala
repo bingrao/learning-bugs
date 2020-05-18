@@ -13,7 +13,12 @@ trait Common {
 
   def write(path:String, context:String) = {
     val p = (new File(path)).getParentFile
-    if (!p.exists()) p.mkdir()
+    val success = if (!p.exists()) p.mkdirs() else true
+
+    if (!success) {
+      logger.error(s"The ${path} create failed ...")
+      System.exit(-1)
+    }
 
     val printWriter = new PrintWriter(new FileWriter(path))
     printWriter.print(context)

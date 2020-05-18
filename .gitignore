@@ -191,6 +191,7 @@ benchmarks/**/logs/
 benchmarks/**/data/
 data/
 log/
+src/data/processed
 
 # End of https://www.gitignore.io/api/eclipse
 
