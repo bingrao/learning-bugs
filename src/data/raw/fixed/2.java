@@ -1,3 +1,0 @@
-public com.google.common.util.concurrent.ListenableFuture<com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser> login(com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider provider, java.lang.String oAuthToken, java.util.HashMap<java.lang.String, java.lang.String> parameters) {
-    return login(provider.toString(), oAuthToken, parameters);
-}

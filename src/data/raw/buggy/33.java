@@ -1,1 +1,0 @@
-void drawHover(X cell, Y state);
