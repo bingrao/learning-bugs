@@ -3,12 +3,16 @@ from torch.autograd import Variable
 import torch
 from nmt.data.batch import custom_collate_fn
 from nmt.model.transformer.model import build_model
-from nmt.utils.context import Context
+from nmt.utils.context import Context, create_dir
 from benchmarks.learning_fix.preprocess import dataset_generation
 from torch.utils.data import DataLoader
 import time
 from nmt.data.batch import Batch
 
+from datetime import datetime
+import os
+from os.path import join
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 class NoamOpt:
     """Optim wrapper that implements rate."""
@@ -173,6 +177,23 @@ class DataProcessEngine:
         self.device = context.device  # cpu or gpu
         self.device_id = context.device_id  # [0, 1, 2, 3]
 
+
+        self.save_every = context.save_every
+        self.save_format = 'epoch={epoch:0>3}-val_loss={val_loss:<.3}.pth'
+        self.epoch = 0
+        self.history = []
+        run_name = (
+            "d_model={d_model}-"
+            "layers_count={layers_count}-"
+            "heads_count={heads_count}-"
+            "pe={positional_encoding}-"
+            "optimizer={optimizer}-"
+            "{timestamp}"
+        ).format(**ctx.config, timestamp=datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))
+        self.checkpoint = context.project_checkpoint
+        self.checkpoint_dir = join(os.path.dirname(context.project_raw_dir), 'checkpoints', run_name)
+        create_dir(self.checkpoint_dir)
+
     def preprocess(self, data_source_type="small"):
 
         self.logger.info(f"Loading {data_source_type} data from disk and parse it as a bunch of batches ...")
@@ -210,9 +231,9 @@ class DataProcessEngine:
         self.logger.info("Training Process is begining ...")
         for epoch in range(self.epochs):
             # Set model in train
+            self.epoch = epoch
             self.model.train()
-            self.run_epoch(self.train_iter,
-                           loss_func(self.model.generator, criterion, opt=opt))
+            total_loss = self.run_epoch(self.train_iter, loss_func(self.model.generator, criterion, opt=opt))
 
             # Evaluation Model
             self.model.eval()
@@ -221,6 +242,9 @@ class DataProcessEngine:
                                   loss_func(self.model.generator, criterion, opt=None))
 
             self.logger.info("Epoch Step: %d, \tLoss: %f", epoch, loss)
+
+            if epoch % self.save_every == 0 or epoch == self.epochs:
+                self._save_model(epoch, total_loss, loss)
 
     def run_epoch(self, data_iter, loss_compute):
         """
@@ -262,6 +286,40 @@ class DataProcessEngine:
                 tokens = 0
 
         return total_loss / total_tokens
+
+
+    def _save_model(self, epoch, train_epoch_loss, val_epoch_loss):
+
+        checkpoint_filename = self.save_format.format(
+            epoch=epoch,
+            val_loss=val_epoch_loss
+        )
+
+        if self.checkpoint is None:
+            checkpoint_filepath = join(self.checkpoint_dir, checkpoint_filename)
+        else:
+            checkpoint_filepath = self.checkpoint
+
+        save_state = {
+            'epoch': epoch,
+            'train_loss': train_epoch_loss,
+            'val_loss': val_epoch_loss,
+            'checkpoint': checkpoint_filepath,
+        }
+
+        if self.epoch > 0:
+            torch.save(self.model.state_dict(), checkpoint_filepath)
+            self.history.append(save_state)
+
+        if self.logger:
+            self.logger.info("Saved model to {}".format(checkpoint_filepath))
+            # self.logger.info("Current best model is {}".format(self.best_checkpoint_filepath))
+
+
+    def _elapsed_time(self):
+        now = datetime.now()
+        elapsed = now - self.start_time
+        return str(elapsed).split('.')[0]  # remove milliseconds
 
     def postprocess(self):
         pass
