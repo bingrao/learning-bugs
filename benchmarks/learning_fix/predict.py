@@ -1,9 +1,10 @@
 import torch
 from torch.autograd import Variable
 from nmt.model.transformer.model import build_model
-from benchmarks.example.datasets import IndexedInputTargetTranslationDataset, IndexDictionary
 from nmt.utils.context import Context
 from nmt.utils.pad import subsequent_mask, pad_masking, subsequent_masking
+from benchmarks.learning_fix.preprocess import dataset_generation
+
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -21,7 +22,7 @@ class Beam:
         self.top_sentence_ended = False
 
         self.prev_ks = []
-        self.next_ys = [torch.LongTensor(beam_size).fill_(start_token_id)] # remove padding
+        self.next_ys = [torch.LongTensor(beam_size).fill_(start_token_id)]  # remove padding
 
         self.current_scores = torch.FloatTensor(beam_size).zero_()
         self.all_scores = []
@@ -136,18 +137,6 @@ class Predictor:
         self.source_dictionary = src_dictionary
         self.target_dictionary = tgt_dictionary
 
-        # Get a list index number of a given input string based on source dictionary.
-        # Input: a input string
-        # output: a corresponding index list
-        self.preprocess = IndexedInputTargetTranslationDataset.preprocess(self.source_dictionary)
-
-        # Get a output string by converting a list of index based
-        # on target dictionary to a corresponding output string
-        # Input: an index list
-        # output: a corresponding output string
-        self.postprocess = lambda x: ' '.join(
-            [token for token in self.target_dictionary.tokenify_indexes(x) if token != '<EndSent>'])
-
         self.max_length = max_length
         self.beam_size = beam_size
         self.attentions = None
@@ -165,19 +154,24 @@ class Predictor:
             exit(-1)
 
 
-    def predict_one(self, source=None, num_candidates=None):
+    def predict(self, source=None, num_candidates=None):
         source = self.context.source if source is None else source
-
         num_candidates = self.context.num_candidates if num_candidates is None else num_candidates
         self.logger.debug("[%s] Predict Input Source: %s, nums of Candidnum_candidatesates %d", self.__class__.__name__,
-                          str(source), num_candidates)
+                         str(source), num_candidates)
 
-        source_preprocessed = self.preprocess(source)
+        # Get a list index number of a given input string based on source dictionary.
+        # Input: a input string
+        # output: a corresponding index list
+        source_preprocessed = self.source_dictionary.get_tokens_embedding(source)
         self.logger.debug("[%s] The corresponding indexes of [%s]: %s", self.__class__.__name__,
                           str(source), str(source_preprocessed))
 
-        source_tensor = torch.tensor(source_preprocessed).unsqueeze(0)
-        length_tensor = torch.tensor(len(source_preprocessed)).unsqueeze(0)
+        return self.predict_one(source_preprocessed, num_candidates)
+
+    def predict_one(self, source=None, num_candidates=None):
+        source_tensor = torch.tensor(source).unsqueeze(0)
+        length_tensor = torch.tensor(len(source)).unsqueeze(0)
         self.logger.debug("[%s] The index source Tensor: %s, lenght %s", self.__class__.__name__,
                           source_tensor, length_tensor)
 
@@ -232,7 +226,7 @@ class Predictor:
 
         self.attentions = attentions
         self.hypothesises = [[token.item() for token in h] for h in hypothesises]
-        hs = [self.postprocess(h) for h in self.hypothesises]
+        hs = [self.target_dictionary.get_tokens(h) for h in self.hypothesises]
         return list(reversed(hs))
 
 
@@ -240,15 +234,16 @@ if __name__ == "__main__":
 
     context = Context(desc="Prediction")
     logger = context.logger
+    data_source_type = "small"
+    logger.info(f"Loading {data_source_type} data from disk and parse it as a bunch of batches ...")
+    train_dataset, eval_dataset, test_dataset = dataset_generation(context, data_type=data_source_type)
 
     logger.info('Constructing dictionaries...')
-    source_dictionary = IndexDictionary.load(context.project_processed_dir, mode='source',
-                                             vocabulary_size=context.vocabulary_size)
-    target_dictionary = IndexDictionary.load(context.project_processed_dir, mode='target',
-                                             vocabulary_size=context.vocabulary_size)
+    source_dictionary = train_dataset.src_vocab
+    target_dictionary = train_dataset.tgt_vocab
 
     logger.info('Building model...')
-    model = build_model(context, source_dictionary.vocabulary_size, target_dictionary.vocabulary_size)
+    model = build_model(context, len(source_dictionary), len(target_dictionary))
 
     logger.info("Building Predictor ....")
     predictor = Predictor(ctx=context,
@@ -257,5 +252,5 @@ if __name__ == "__main__":
                           tgt_dictionary=target_dictionary)
 
     logger.info("Get Predict Result ...")
-    for index, candidate in enumerate(predictor.predict_one()):
+    for index, candidate in enumerate(predictor.predict()):
         logger.info(f'Candidate {index} : {candidate}')

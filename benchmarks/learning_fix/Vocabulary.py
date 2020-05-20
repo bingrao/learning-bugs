@@ -40,6 +40,14 @@ class Vocabulary:
     def get_vocab_size(self):
         return self.__len__()
 
+    def get_tokens_embedding(self, source):
+        source_tokens = source.strip().split()
+        return [self.get_token_embedding(token) for token in source_tokens]
+
+    def get_tokens(self, embeddings):
+        tokens = [self.idx2word[index] for index in embeddings]
+        return " ".join([token for token in tokens if token != self.end_token])
+
     def get_token_embedding(self, token):
         """
         If user provide a embedding method, use it, otherwise use the index instead.

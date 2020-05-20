@@ -1,10 +1,13 @@
 from torch.utils.data import Dataset
-from nmt.utils.context import Context, create_dir
-from os.path import join
 from torchtext import data
 from benchmarks.learning_fix.Vocabulary import Vocabulary
-import numpy as np
+from nmt.utils.context import Context, create_dir
+from torch.utils.data import DataLoader
+from nmt.data.batch import Batch
+from os.path import join
+import torch
 
+PAD_INDEX = 0
 class LFDataset(Dataset):
     def __init__(self,
                  ctx=None,
@@ -109,6 +112,35 @@ class LFDataset(Dataset):
                 f3.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_embedding)))
                 f4.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_position)))
 
+def input_target_collate_fn(batch):
+
+    """
+    merges a list of samples to form a mini-batch.
+    batch: (src, src_pos, tgt, tgt_pos)
+    """
+
+    src_max_len = max([len(src) for src, _, _, _ in batch])
+    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
+
+    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
+    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
+
+    srcs_pos_padded = [src_pos + list(range(max(src_pos) + 1, max(src_pos) + 1 + (src_max_len - len(src_pos))))
+                       for _, src_pos, _, _ in batch]
+    tgts_pos_padded = [tgt_pos + list(range(max(tgt_pos) + 1, max(tgt_pos) + 1 + (tgt_max_len - len(tgt_pos))))
+                       for _, _, _, tgt_pos in batch]
+
+    srcs_tensor = torch.tensor(srcs_padded)
+    tgts_tensor = torch.tensor(tgts_padded)
+    srcs_pos_tensor = torch.tensor(srcs_pos_padded)
+    tgts_pos_tensor = torch.tensor(tgts_pos_padded)
+
+    # print(f"srcs {srcs_tensor.size()}" +
+    #       f"srcs_pos {srcs_pos_tensor.size()} " +
+    #       f"tgts {tgts_tensor.size()} " +
+    #       f"tgts_pos{tgts_pos_tensor.size()} \n")
+    # print("*********************************************************\n\n")
+    return Batch(src=srcs_tensor, trg=tgts_tensor, pad=PAD_INDEX, src_pos=srcs_pos_tensor, trg_pos=tgts_pos_tensor)
 
 def dataset_generation(context, data_type="small"):
     logger = context.logger
@@ -130,6 +162,12 @@ def dataset_generation(context, data_type="small"):
                              dataset=data_type, padding=pad_idx, src_vocab=src_vocab, tgt_vocab=tgt_vocab)
 
     return train_dataset, eval_dataset, test_dataset
+
+def generated_iter_dataset(dataset, nums_batch=64):
+    return DataLoader(dataset,
+                      batch_size=nums_batch,
+                      shuffle=True,
+                      collate_fn=input_target_collate_fn)
 
 
 if __name__ == "__main__":

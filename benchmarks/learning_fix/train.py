@@ -1,14 +1,10 @@
 import torch.nn as nn
 from torch.autograd import Variable
 import torch
-from nmt.data.batch import custom_collate_fn
 from nmt.model.transformer.model import build_model
 from nmt.utils.context import Context, create_dir
-from benchmarks.learning_fix.preprocess import dataset_generation
-from torch.utils.data import DataLoader
+from benchmarks.learning_fix.preprocess import dataset_generation, generated_iter_dataset
 import time
-from nmt.data.batch import Batch
-
 from datetime import datetime
 import os
 from os.path import join
@@ -46,40 +42,6 @@ class NoamOpt:
 def get_std_opt(model):
     return NoamOpt(model, factor=1, warmup=2000,
                    optimizer=torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
-
-
-PAD_INDEX = 0
-
-
-def input_target_collate_fn(batch):
-
-    """
-    merges a list of samples to form a mini-batch.
-    batch: (src, src_pos, tgt, tgt_pos)
-    """
-
-    src_max_len = max([len(src) for src, _, _, _ in batch])
-    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
-
-    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
-    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
-
-    srcs_pos_padded = [src_pos + list(range(max(src_pos) + 1, max(src_pos) + 1 + (src_max_len - len(src_pos))))
-                       for _, src_pos, _, _ in batch]
-    tgts_pos_padded = [tgt_pos + list(range(max(tgt_pos) + 1, max(tgt_pos) + 1 + (tgt_max_len - len(tgt_pos))))
-                       for _, _, _, tgt_pos in batch]
-
-    srcs_tensor = torch.tensor(srcs_padded)
-    tgts_tensor = torch.tensor(tgts_padded)
-    srcs_pos_tensor = torch.tensor(srcs_pos_padded)
-    tgts_pos_tensor = torch.tensor(tgts_pos_padded)
-
-    # print(f"srcs {srcs_tensor.size()}" +
-    #       f"srcs_pos {srcs_pos_tensor.size()} " +
-    #       f"tgts {tgts_tensor.size()} " +
-    #       f"tgts_pos{tgts_pos_tensor.size()} \n")
-    # print("*********************************************************\n\n")
-    return Batch(src=srcs_tensor, trg=tgts_tensor, pad=PAD_INDEX, src_pos=srcs_pos_tensor, trg_pos=tgts_pos_tensor)
 
 
 class SimpleLossComputeWithLablSmoothing:
@@ -177,7 +139,6 @@ class DataProcessEngine:
         self.device = context.device  # cpu or gpu
         self.device_id = context.device_id  # [0, 1, 2, 3]
 
-
         self.save_every = context.save_every
         self.save_format = 'epoch={epoch:0>3}-val_loss={val_loss:<.3}.pth'
         self.epoch = 0
@@ -200,20 +161,9 @@ class DataProcessEngine:
         train_dataset, eval_dataset, test_dataset = dataset_generation(self.context, data_type=data_source_type)
 
         self.logger.info("Build iteral dataset ... ")
-        self.train_iter = DataLoader(train_dataset,
-                                     batch_size=self.nums_batch,
-                                     shuffle=True,
-                                     collate_fn=input_target_collate_fn)
-
-        self.eval_iter = DataLoader(eval_dataset,
-                                    batch_size=self.nums_batch,
-                                    shuffle=True,
-                                    collate_fn=input_target_collate_fn)
-
-        self.test_iter = DataLoader(test_dataset,
-                                    batch_size=self.nums_batch,
-                                    shuffle=True,
-                                    collate_fn=custom_collate_fn)
+        self.train_iter = generated_iter_dataset(train_dataset, self.nums_batch)
+        self.eval_iter = generated_iter_dataset(eval_dataset, self.nums_batch)
+        self.test_iter = generated_iter_dataset(test_dataset, self.nums_batch)
 
         self.logger.info("Build src/tgt Vocabulary ...")
         self.src_vocab = train_dataset.src_vocab
@@ -308,12 +258,9 @@ class DataProcessEngine:
         }
 
         if self.epoch > 0:
+            self.logger.info("Saved model to {}".format(checkpoint_filepath))
             torch.save(self.model.state_dict(), checkpoint_filepath)
             self.history.append(save_state)
-
-        if self.logger:
-            self.logger.info("Saved model to {}".format(checkpoint_filepath))
-            # self.logger.info("Current best model is {}".format(self.best_checkpoint_filepath))
 
 
     def _elapsed_time(self):

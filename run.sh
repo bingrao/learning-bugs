@@ -53,7 +53,7 @@ case ${model} in
                               --project_processed_dir="${ProjectProcessedDataDir}" \
                               --project_log="${ProjectLog}" \
                               --project_checkpoint="${ProjectCheckpoint}" \
-                              --debug=False \
+                              --debug=True \
                               --phase="${model}"
   ;;
   "train")
@@ -84,7 +84,7 @@ case ${model} in
                               --phase="${model}" \
                               --device='cuda' \
                               --device_id=[1] \
-                              --source="There is an imbalance here ."
+                              --source="private TYPE_1 getType ( TYPE_2 VAR_1 ) { TYPE_3 VAR_2 = new TYPE_3 ( STRING_1 ) ; return new TYPE_1 ( VAR_2 , VAR_2 ) ; }"
 
   ;;
   "val")
