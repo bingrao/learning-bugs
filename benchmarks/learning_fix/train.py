@@ -207,9 +207,9 @@ class DataProcessEngine:
         for i, batch in enumerate(data_iter):
 
             src = batch.src.to(self.context.device) if self.context.is_cuda else batch.src
-            src_pos = batch.src_pos.to(self.context.device) if self.context.is_cuda else batch.src_pos
+            src_pos = batch.src_pos.to(self.context.device) if self.context.is_cuda and batch.src_pos is not None else batch.src_pos
             trg = batch.trg.to(self.context.device) if self.context.is_cuda else batch.trg
-            trg_pos = batch.trg_pos.to(self.context.device) if self.context.is_cuda else batch.trg_pos
+            trg_pos = batch.trg_pos.to(self.context.device) if self.context.is_cuda and batch.trg_pos is not None else batch.trg_pos
             trg_y = batch.trg_y.to(self.context.device) if self.context.is_cuda else batch.trg_y
             src_mask = batch.src_mask.to(self.context.device) if self.context.is_cuda else batch.src_mask
             tgt_mask = batch.trg_mask.to(self.context.device) if self.context.is_cuda else batch.trg_mask

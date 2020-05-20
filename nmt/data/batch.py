@@ -18,6 +18,8 @@ class Batch:
             self.ntokens = (self.trg_y != pad).data.sum()
         if trg_pos is not None:
             self.trg_pos = trg_pos[:, :-1]
+        else:
+            self.trg_pos = None
 
 
 def custom_collate_fn(batches):
