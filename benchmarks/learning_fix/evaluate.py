@@ -11,34 +11,40 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class Evaluator:
-    def __init__(self, pred=None, save_filepath=None):
-
+    def __init__(self, ctx, pred=None, save_filepath=None):
+        self.context = ctx
         self.predictor = pred
         self.save_filepath = save_filepath
 
-    def evaluate_dataset(self, test_dataset):
+    def evaluate_dataset(self, data_iter):
         def tokenize(x):
             return x.split()
 
         predictions = []
-        for source, _, target, _ in tqdm(test_dataset):
-            prediction = self.predictor.predict_one(source=source, num_candidates=1)[0]
+        for batch in tqdm(data_iter):
+            src = batch.src.to(self.context.device) if self.context.is_cuda else batch.src
+            src_pos = batch.src_pos.to(self.context.device) if self.context.is_cuda else batch.src_pos
+            src_mask = batch.src_mask.to(self.context.device) if self.context.is_cuda else batch.src_mask
+
+            prediction = self.predictor.predict_one(source=src,
+                                                    sources_mask=src_mask,
+                                                    source_position=src_pos,
+                                                    num_candidates=4)[0]
             predictions.append(prediction)
 
         hypotheses = [tokenize(prediction) for prediction in predictions]
-        list_of_references = [[tokenize(target)] for source, _, target, _ in test_dataset]
+        list_of_references = [[tokenize(batch.trg)] for batch in data_iter]
         smoothing_function = SmoothingFunction()
 
         with open(self.save_filepath, 'w') as file:
-            for (source, _, target, _), prediction, hypothesis, references in zip(test_dataset, predictions,
-                                                                                  hypotheses, list_of_references):
+            for batch, prediction, hypothesis, references in zip(data_iter, predictions, hypotheses, list_of_references):
                 sentence_bleu_score = sentence_bleu(references,
                                                     hypothesis,
                                                     smoothing_function=smoothing_function.method3)
                 line = "{bleu_score}\t{source}\t{target}\t|\t{prediction}".format(
                     bleu_score=sentence_bleu_score,
-                    source=source,
-                    target=target,
+                    source=batch.src,
+                    target=batch.trg,
                     prediction=prediction
                 )
                 file.write(line + '\n')
@@ -59,6 +65,9 @@ if __name__ == "__main__":
     source_dictionary = train_datasets.src_vocab
     target_dictionary = train_datasets.tgt_vocab
 
+    # Set up mini-batch size 1 since we call prefict_one function to predict only one input
+    test_iter = generated_iter_dataset(context, test_datasets, 1)
+
     logger.info('Building model...')
     model = build_model(context, len(source_dictionary), len(target_dictionary))
 
@@ -76,9 +85,9 @@ if __name__ == "__main__":
     else:
         eval_filepath = context.save_result
 
-    evaluator = Evaluator(pred=predictor, save_filepath=eval_filepath)
+    evaluator = Evaluator(ctx=context, pred=predictor, save_filepath=eval_filepath)
 
     logger.info('Evaluating...')
-    bleu_score = evaluator.evaluate_dataset(test_datasets)
+    bleu_score = evaluator.evaluate_dataset(test_iter)
     logger.info('Evaluation time : %d s', (datetime.now() - timestamp).seconds)
     logger.info("BLEU score : %f ", bleu_score)

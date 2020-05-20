@@ -40,13 +40,40 @@ class Vocabulary:
     def get_vocab_size(self):
         return self.__len__()
 
-    def get_tokens_embedding(self, source):
-        source_tokens = source.strip().split()
-        return [self.get_token_embedding(token) for token in source_tokens]
+    def preprocess(self, source):
+        source_absract, source_position = self.get_source_abstract(source)
+        source_embedding = self.get_source_embedding(source_absract)
+        return source_embedding, source_position
 
-    def get_tokens(self, embeddings):
+    def postprocess(self, embeddings):
+        """
+        return a sequence of token from a list of embeddings
+        """
         tokens = [self.idx2word[index] for index in embeddings]
         return " ".join([token for token in tokens if token != self.end_token])
+
+    def get_source_embedding(self, source):
+        source_tokens = list(source.strip().split())
+        return [self.get_token_embedding(token) for token in source_tokens]
+
+    def get_source_abstract(self, source):
+        """
+        TODO:  need work with scala project to get abstract code,
+        the current implementation is for debug
+        """
+        source_abstract = source
+        if self.context.position_style == 'sequence':
+            tokens = self.get_source_embedding(source)
+            source_position = [idx for idx, _ in enumerate(tokens)]
+        elif self.context.position_style == 'tree':
+            tokens = self.get_source_embedding(source)
+            source_position = [idx for idx, _ in enumerate(tokens)]
+        elif self.context.position_style == 'path':
+            tokens = self.get_source_embedding(source)
+            source_position = [idx for idx, _ in enumerate(tokens)]
+        else:
+            source_position = None
+        return source_abstract, source_position
 
     def get_token_embedding(self, token):
         """

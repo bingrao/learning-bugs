@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from nmt.data.batch import Batch
 from os.path import join
 import torch
+import numpy as np
 
 PAD_INDEX = 0
 class LFDataset(Dataset):
@@ -78,12 +79,14 @@ class LFDataset(Dataset):
         for src_line, tgt_line in zip(src_raw_data, tgt_raw_data):
             src_tokens = list(src_line.split())
             src_embedding = [self.src_vocab.get_token_embedding(token) for token in src_tokens]
+
             # In a sequence, we can use their indexes as the postion,
             # In a tree architecture, we use node postion in the AST as correponding tokens' position
             src_pos = [idx for idx, _ in enumerate(src_embedding)]
 
             tgt_tokens = self.tgt_vocab.wrapping_tokens(list(tgt_line.split()))
             tgt_embedding = [self.tgt_vocab.get_token_embedding(token) for token in tgt_tokens]
+
             # In a sequence, we can use their indexes as the postion,
             # In a tree architecture, we use node postion in the AST as correponding tokens' position
             tgt_pos = [idx for idx, _ in enumerate(tgt_embedding)]
@@ -112,11 +115,33 @@ class LFDataset(Dataset):
                 f3.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_embedding)))
                 f4.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_position)))
 
-def input_target_collate_fn(batch):
-
+def collate_fn_default(batch):
     """
     merges a list of samples to form a mini-batch.
     batch: (src, src_pos, tgt, tgt_pos)
+    By default, there is no positions for src and tgt
+    """
+
+    src_max_len = max([len(src) for src, _, _, _ in batch])
+    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
+
+    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
+    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
+
+    srcs_tensor = torch.tensor(srcs_padded)
+    tgts_tensor = torch.tensor(tgts_padded)
+
+    return Batch(src=srcs_tensor, trg=tgts_tensor, pad=PAD_INDEX)
+
+def collate_fn_sequence(batch):
+    """
+    merges a list of samples to form a mini-batch.
+    batch: (src, src_pos, tgt, tgt_pos)
+    Here, src_pos and tgt_pos are a sequence of indexed number
+    for each corresponding token.
+    for example
+        src_pos = [0, 1, 2, 3, 4, 5, 6, 8]
+        tgt_pos = [0, 1, 2, 3, 4, 5, 6, 8]
     """
 
     src_max_len = max([len(src) for src, _, _, _ in batch])
@@ -135,11 +160,43 @@ def input_target_collate_fn(batch):
     srcs_pos_tensor = torch.tensor(srcs_pos_padded)
     tgts_pos_tensor = torch.tensor(tgts_pos_padded)
 
-    # print(f"srcs {srcs_tensor.size()}" +
-    #       f"srcs_pos {srcs_pos_tensor.size()} " +
-    #       f"tgts {tgts_tensor.size()} " +
-    #       f"tgts_pos{tgts_pos_tensor.size()} \n")
-    # print("*********************************************************\n\n")
+    return Batch(src=srcs_tensor, trg=tgts_tensor, pad=PAD_INDEX, src_pos=srcs_pos_tensor, trg_pos=tgts_pos_tensor)
+
+def collate_fn_tree(batch):
+    """
+    merges a list of samples to form a mini-batch.
+    batch: (src, src_pos, tgt, tgt_pos)
+    where src_pos/tgt_pos is a list of vectors positional embeddings
+    In a list, a vector is a fixed-length vector for a corresponding token.
+    However, the lenght of a vector may be different for different input source
+    for example src_pos = [[1, 0, 2], [1, 2], ...]
+    """
+
+    def padding_vector(x):
+        length = max(map(len, x))
+        return np.array([xi + [0.0] * (length - len(xi)) for xi in x])
+
+    src_max_len = max([len(src) for src, _, _, _ in batch])
+    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
+
+    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
+    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
+
+    default_dim_pos = 64
+    empty_pos = [0.0] * default_dim_pos
+
+    srcs_pos_alian = [src_pos + [empty_pos] * (src_max_len - len(src_pos)) for _, src_pos, _, _ in batch]
+    tgts_pos_alian = [tgt_pos + [empty_pos] * (tgt_max_len - len(tgt_pos)) for _, _, _, tgt_pos in batch]
+
+    srcs_pos_padded = [padding_vector(vector) for vector in srcs_pos_alian]
+    tgts_pos_padded = [padding_vector(vector) for vector in tgts_pos_alian]
+
+    srcs_tensor = torch.tensor(srcs_padded)
+    tgts_tensor = torch.tensor(tgts_padded)
+
+    srcs_pos_tensor = torch.tensor(srcs_pos_padded)
+    tgts_pos_tensor = torch.tensor(tgts_pos_padded)
+
     return Batch(src=srcs_tensor, trg=tgts_tensor, pad=PAD_INDEX, src_pos=srcs_pos_tensor, trg_pos=tgts_pos_tensor)
 
 def dataset_generation(context, data_type="small"):
@@ -163,11 +220,21 @@ def dataset_generation(context, data_type="small"):
 
     return train_dataset, eval_dataset, test_dataset
 
-def generated_iter_dataset(dataset, nums_batch=64):
+def generated_iter_dataset(context, dataset, nums_batch=64):
+
+    if context.position_style == 'sequence':
+        collate_fn = collate_fn_sequence
+    elif context.position_style == 'tree':
+        collate_fn = collate_fn_tree
+    elif context.position_style == 'path':
+        collate_fn = collate_fn_tree
+    else:
+        collate_fn = collate_fn_default
+
     return DataLoader(dataset,
                       batch_size=nums_batch,
                       shuffle=True,
-                      collate_fn=input_target_collate_fn)
+                      collate_fn=collate_fn)
 
 
 if __name__ == "__main__":

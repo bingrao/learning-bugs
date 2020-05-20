@@ -161,9 +161,9 @@ class DataProcessEngine:
         train_dataset, eval_dataset, test_dataset = dataset_generation(self.context, data_type=data_source_type)
 
         self.logger.info("Build iteral dataset ... ")
-        self.train_iter = generated_iter_dataset(train_dataset, self.nums_batch)
-        self.eval_iter = generated_iter_dataset(eval_dataset, self.nums_batch)
-        self.test_iter = generated_iter_dataset(test_dataset, self.nums_batch)
+        self.train_iter = generated_iter_dataset(self.context, train_dataset, self.nums_batch)
+        self.eval_iter = generated_iter_dataset(self.context, eval_dataset, self.nums_batch)
+        self.test_iter = generated_iter_dataset(self.context, test_dataset, self.nums_batch)
 
         self.logger.info("Build src/tgt Vocabulary ...")
         self.src_vocab = train_dataset.src_vocab

@@ -93,7 +93,7 @@ class PositionalEncoding(torch.nn.Module):
         """
 
         if step is None:
-            if position is not None and self.context.position_style == 'tree':
+            if position is not None and self.context.position_style == 'sequence':
 
                 """
                 We argue that tokens' positions usually are in a customized order, rather than 
@@ -106,6 +106,21 @@ class PositionalEncoding(torch.nn.Module):
                 batch_size, seq_len = position.size()  # dim: (batch_size, seq_len)
                 pos_embedding = torch.cat([self.pe[:, position[i, :]] for i in range(batch_size)])
                 x = x + Variable(pos_embedding, requires_grad=False)
+
+            elif position is not None and self.context.position_style == 'tree':
+                """
+                In each row of [[position]] is a list of list, that is [[node_pos1], [node_pos2], 
+                [node_pos3], [node_pos4], ...]. In each cell of a [[position]] is a vector of poistion encoding for a 
+                token. Since the size of vectors of each token may be different, so we need to pad them to 
+                same dimension: d_model
+                """
+                batch_size, seq_len = position.size()  # dim: (batch_size, seq_len) # dim: (batch_size, seq_len)
+
+                x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
+
+            elif position is not None and self.context.position_style == 'path':
+                x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
+
             else:
                 """
                 By default, a position of tokens in a sentence/code is in a sequential order and 
