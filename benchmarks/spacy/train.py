@@ -1,5 +1,5 @@
 from nmt.model.transformer.model import build_model
-from nmt.utils.context import Context
+from utils.context import Context
 from nmt.data.batch import Batch
 from nmt.utils.pad import subsequent_mask
 from torchtext import data

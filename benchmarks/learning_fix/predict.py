@@ -1,8 +1,8 @@
 import torch
 from torch.autograd import Variable
 from nmt.model.transformer.model import build_model
-from nmt.utils.context import Context
-from nmt.utils.pad import subsequent_mask, pad_masking, subsequent_masking
+from utils.context import Context
+from nmt.utils.pad import subsequent_mask
 from benchmarks.learning_fix.preprocess import dataset_generation
 
 

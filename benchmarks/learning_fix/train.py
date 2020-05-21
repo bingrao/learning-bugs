@@ -2,7 +2,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch
 from nmt.model.transformer.model import build_model
-from nmt.utils.context import Context, create_dir
+from utils.context import Context, create_dir
 from benchmarks.learning_fix.preprocess import dataset_generation, generated_iter_dataset
 import time
 from datetime import datetime

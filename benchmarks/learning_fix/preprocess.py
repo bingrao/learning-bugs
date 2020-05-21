@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 from torchtext import data
 from benchmarks.learning_fix.Vocabulary import Vocabulary
-from nmt.utils.context import Context, create_dir
+from utils.context import Context, create_dir
 from torch.utils.data import DataLoader
 from nmt.data.batch import Batch
 from os.path import join

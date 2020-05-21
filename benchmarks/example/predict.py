@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 from nmt.model.transformer.model import build_model
 from benchmarks.example.datasets import IndexedInputTargetTranslationDataset, IndexDictionary
-from nmt.utils.context import Context
+from utils.context import Context
 from nmt.utils.pad import subsequent_mask, pad_masking, subsequent_masking
 
 import warnings

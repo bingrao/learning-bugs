@@ -4,7 +4,7 @@ from datetime import datetime
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
 from benchmarks.learning_fix.preprocess import dataset_generation, generated_iter_dataset
 from tqdm import tqdm
-from nmt.utils.context import Context
+from utils.context import Context
 import os
 
 import warnings

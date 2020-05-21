@@ -1,4 +1,4 @@
-from nmt.utils.context import create_dir
+from utils.context import create_dir
 from os.path import join
 import collections
 

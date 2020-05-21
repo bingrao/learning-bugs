@@ -4,7 +4,7 @@ from benchmarks.example.datasets import TranslationDataset, IndexDictionary
 from datetime import datetime
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
 from tqdm import tqdm
-from nmt.utils.context import Context
+from utils.context import Context
 import os
 
 import warnings

@@ -1,5 +1,5 @@
-from nmt.utils.argument import get_main_argument
-from nmt.utils.log import get_logger
+from utils.argument import get_main_argument
+from utils.log import get_logger
 from os.path import join, exists
 from os import makedirs
 import os
