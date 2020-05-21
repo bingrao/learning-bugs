@@ -6,10 +6,7 @@ from benchmarks.learning_fix.preprocess import dataset_generation, generated_ite
 from tqdm import tqdm
 from utils.context import Context
 import os
-
-import warnings
-warnings.filterwarnings('ignore')
-
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 class Evaluator:
     def __init__(self, ctx, pred=None, save_filepath=None):
         self.context = ctx
@@ -22,13 +19,10 @@ class Evaluator:
 
         predictions = []
         for batch in tqdm(data_iter):
-            src = batch.src.to(self.context.device) if self.context.is_cuda else batch.src
-            src_pos = batch.src_pos.to(self.context.device) if self.context.is_cuda else batch.src_pos
-            src_mask = batch.src_mask.to(self.context.device) if self.context.is_cuda else batch.src_mask
 
-            prediction = self.predictor.predict_one(source=src,
-                                                    sources_mask=src_mask,
-                                                    source_position=src_pos,
+            prediction = self.predictor.predict_one(source=batch.src,
+                                                    sources_mask=batch.src_mask,
+                                                    source_position=batch.src_pos,
                                                     num_candidates=4)[0]
             predictions.append(prediction)
 
@@ -69,6 +63,7 @@ if __name__ == "__main__":
     test_iter = generated_iter_dataset(context, test_datasets, 1)
 
     logger.info('Building model...')
+
     model = build_model(context, len(source_dictionary), len(target_dictionary))
 
     predictor = Predictor(ctx=context,

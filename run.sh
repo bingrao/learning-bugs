@@ -82,7 +82,7 @@ case ${model} in
                               --project_checkpoint="${ProjectCheckpoint}" \
                               --debug=False \
                               --phase="${model}" \
-                              --device='cpu' \
+                              --device='cuda' \
                               --device_id=[1] \
                               --source="private TYPE_1 getType ( TYPE_2 VAR_1 ) { TYPE_3 VAR_2 = new TYPE_3 ( STRING_1 ) ; return new TYPE_1 ( VAR_2 , VAR_2 ) ; }"
 
@@ -98,7 +98,7 @@ case ${model} in
                               --project_checkpoint="${ProjectCheckpoint}" \
                               --debug=False \
                               --phase="${model}" \
-                               --device='cpu' \
+                               --device='cuda' \
                               --device_id=[1] \
                               --save_result="${ProjectProcessedDataDir}"/"${ProjectName}"_eval.txt
   ;;

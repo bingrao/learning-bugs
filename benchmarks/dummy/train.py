@@ -120,6 +120,7 @@ def run_epoch(data_iter, model, loss_compute, ctx):
             tokens = 0
     return total_loss / total_tokens
 
+
 if __name__ == "__main__":
     # Train the simple copy task.
     ctx = Context(desc="Train")

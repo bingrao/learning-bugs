@@ -107,4 +107,5 @@ def build_model(ctx, src_vocab_size, tgt_vocab_size):
     for p in model.parameters():
         if p.dim() > 1:
             nn.init.xavier_uniform_(p)
+    model.cuda() if ctx.is_cuda else None
     return model

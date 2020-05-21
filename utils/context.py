@@ -2,12 +2,12 @@ from utils.argument import get_main_argument
 from utils.log import get_logger
 from os.path import join, exists
 from os import makedirs
-import os
 import torch
 import json
 import random
 import numpy as np
-
+import warnings
+import os
 
 def init_rng(seed=0):
     random.seed(seed)
@@ -105,4 +105,10 @@ class Context:
         self.is_cuda = self.config["device"] == 'cuda'
         self.is_cpu = self.config["device"] == 'cpu'
         self.is_gpu_parallel = self.is_cuda and (len(self.device_id) > 1)
+
         init_rng(seed=0)
+        # os.environ['CUDA_VISIBLE_DEVICES'] = str(self.device_id[0])
+        warnings.filterwarnings('ignore')
+
+    def mapping_to_cuda(self, tensor):
+        return tensor.to(self.device) if tensor is not None and self.is_cuda else tensor

@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 import os
 from os.path import join
+
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 class NoamOpt:
@@ -171,7 +172,7 @@ class DataProcessEngine:
 
         self.logger.info("Build transformer model ...")
         self.model = build_model(self.context, len(self.src_vocab), len(self.tgt_vocab))
-        self.model.cuda() if self.context.is_cuda else None
+        # self.model.cuda() if self.context.is_cuda else None
         self.logger.debug(self.model)
 
     def run(self, loss_func=None, opt=None):
@@ -206,19 +207,19 @@ class DataProcessEngine:
         tokens = 0
         for i, batch in enumerate(data_iter):
 
-            src = batch.src.to(self.context.device) if self.context.is_cuda else batch.src
-            src_pos = batch.src_pos.to(self.context.device) if self.context.is_cuda and batch.src_pos is not None else batch.src_pos
-            trg = batch.trg.to(self.context.device) if self.context.is_cuda else batch.trg
-            trg_pos = batch.trg_pos.to(self.context.device) if self.context.is_cuda and batch.trg_pos is not None else batch.trg_pos
-            trg_y = batch.trg_y.to(self.context.device) if self.context.is_cuda else batch.trg_y
-            src_mask = batch.src_mask.to(self.context.device) if self.context.is_cuda else batch.src_mask
-            tgt_mask = batch.trg_mask.to(self.context.device) if self.context.is_cuda else batch.trg_mask
+            src = self.context.mapping_to_cuda(batch.src)
+            src_pos = self.context.mapping_to_cuda(batch.src_pos)
+            trg = self.context.mapping_to_cuda(batch.trg)
+            trg_pos = self.context.mapping_to_cuda(batch.trg_pos)
+            trg_y = self.context.mapping_to_cuda(batch.trg_y)
+            src_mask = self.context.mapping_to_cuda(batch.src_mask)
+            trg_mask = self.context.mapping_to_cuda(batch.trg_mask)
 
             # Model forward and output result
             out = self.model(src=src,
                              tgt=trg,
                              src_mask=src_mask,
-                             tgt_mask=tgt_mask,
+                             tgt_mask=trg_mask,
                              src_pos=src_pos,
                              tgt_pos=trg_pos)
 

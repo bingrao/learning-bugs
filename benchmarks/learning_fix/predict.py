@@ -4,10 +4,8 @@ from nmt.model.transformer.model import build_model
 from utils.context import Context
 from nmt.utils.pad import subsequent_mask
 from benchmarks.learning_fix.preprocess import dataset_generation
-
-
-import warnings
-warnings.filterwarnings('ignore')
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 class Beam:
 
@@ -185,6 +183,11 @@ class Predictor:
 
     def predict_one(self, source, sources_mask, source_position, num_candidates):
 
+        source = self.context.mapping_to_cuda(source)
+        source_position = self.context.mapping_to_cuda(source_position)
+        sources_mask = self.context.mapping_to_cuda(sources_mask)
+
+
         memory = self.model.encode(source, sources_mask, source_position)
 
         self.logger.debug("[%s] Encoder Source %s, Output %s dimensions", self.__class__.__name__,
@@ -209,6 +212,8 @@ class Predictor:
 
             new_inputs = beam.get_current_state().unsqueeze(1)  # (beam_size, seq_len=1)
             new_mask = make_std_mask(new_inputs, 0)
+            new_inputs = self.context.mapping_to_cuda(new_inputs)
+            new_mask = self.context.mapping_to_cuda(new_mask)
             decoder_outputs = self.model.decode(tgt=new_inputs,
                                                 memory=memory_beam,
                                                 memory_mask=memory_mask,
