@@ -41,7 +41,8 @@ ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${ProjectName}.pth
 case ${model} in
   "abstract")
     set -x
-    scala -Dlog4j.configuration=${RootPath}/conf/log4j.properties bin/java_abstract-1.0-jar-with-dependencies.jar ${RootPath}/conf/application.conf
+    export JAVA_OPTS="-Xmx4G -Xms256m -Xss64M"
+    scala bin/java_abstract-1.0-jar-with-dependencies.jar ${RootPath}/conf/application.conf
   ;;
   "preprocess")
       set -x
