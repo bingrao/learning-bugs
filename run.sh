@@ -39,11 +39,10 @@ ProjectLog=${ProjectBechmarks}/logs/${model}-${CurrentDate}.log
 ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${ProjectName}.pth
 
 case ${model} in
-#  "abstract")
-#    set -x
-#    mvn assembly:assembly
-#    scala -Dlog4j.configuration=src/main/resources/log4j.properties target/learning-bugs-1.0-SNAPSHOT-jar-with-dependencies.jar ${RootPath}/src/main/resources/application.conf
-#  ;;
+  "abstract")
+    set -x
+    scala -Dlog4j.configuration=${RootPath}/conf/log4j.properties bin/java_abstract-1.0-jar-with-dependencies.jar ${RootPath}/conf/application.conf
+  ;;
   "preprocess")
       set -x
       python "${ProjectBechmarks}"/preprocess.py \
