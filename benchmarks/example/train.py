@@ -11,7 +11,7 @@ from torch import nn
 from benchmarks.example.datasets import IndexedInputTargetTranslationDataset
 from benchmarks.example.dictionaries import IndexDictionary
 from nmt.metric.metrics import AccuracyMetric
-from nmt.utils.pipe import input_target_collate_fn
+from benchmarks.example.pipe import input_target_collate_fn
 from nmt.model.transformer.model import build_model
 from utils.context import Context, create_dir
 

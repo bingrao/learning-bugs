@@ -1,5 +1,5 @@
 import logging
-from nmt.utils.pipe import shared_tokens_generator, source_tokens_generator, target_tokens_generator
+from benchmarks.example.pipe import shared_tokens_generator, source_tokens_generator, target_tokens_generator
 from utils.context import Context
 from benchmarks.example.datasets import TranslationDataset, TokenizedTranslationDataset
 from benchmarks.example.datasets import IndexedInputTargetTranslationDataset
