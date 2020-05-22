@@ -41,7 +41,7 @@ ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${ProjectName}.pth
 case ${model} in
   "abstract")
     set -x
-    export JAVA_OPTS="-Xmx4G -Xms256m -Xss64M"
+    export JAVA_OPTS="-Xmx32G -Xms1g -Xss512M"
     scala bin/java_abstract-1.0-jar-with-dependencies.jar ${RootPath}/conf/application.conf
   ;;
   "preprocess")
