@@ -1,0 +1,23 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="learning-fix_preprocess" type="PythonConfigurationType" factoryName="Python">
+    <module name="learning-bugs" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <env name="PYTHONUNBUFFERED" value="1" />
+    </envs>
+    <option name="SDK_HOME" value="$USER_HOME$/.local/src/anaconda3/envs/learning_fix/bin/python" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/benchmarks/learning_fix" />
+    <option name="IS_MODULE_SDK" value="false" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/benchmarks/learning_fix/preprocess.py" />
+    <option name="PARAMETERS" value="--project_name learning_fix --project_config=$PROJECT_DIR$/benchmarks/learning_fix/configs/default_config.json --project_raw_dir=$PROJECT_DIR$/benchmarks/learning_fix/data --project_processed_dir=$PROJECT_DIR$/benchmarks/learning_fix/processed --project_log=$PROJECT_DIR$/benchmarks/learning_fix/logs/preprocess-2020-05-22.log --project_checkpoint=$PROJECT_DIR$/benchmarks/learning_fix/checkpoints/checkpoint-learning_fix.pth --debug True --phase preprocess" />
+    <option name="SHOW_COMMAND_LINE" value="false" />
+    <option name="EMULATE_TERMINAL" value="false" />
+    <option name="MODULE_MODE" value="false" />
+    <option name="REDIRECT_INPUT" value="false" />
+    <option name="INPUT_FILE" value="" />
+    <method v="2" />
+  </configuration>
+</component>
