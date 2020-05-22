@@ -103,7 +103,10 @@ class Vocabulary:
                     tokens = list(line.strip())
                 else:
                     tokens = line.strip().split(self.delimiter)
-                tokens = [_ for _ in tokens if len(_) > 0]
+
+                # In the input source code, token and its corresponding position is seperated by "@"
+                tokens = [token.split("@")[0] for token in tokens if len(token) > 0]
+
                 if self.target == "fixed":
                     tokens = [self.start_token] + tokens + [self.end_token]
                 cnt.update(tokens)

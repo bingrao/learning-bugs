@@ -110,5 +110,9 @@ class Context:
         # os.environ['CUDA_VISIBLE_DEVICES'] = str(self.device_id[0])
         warnings.filterwarnings('ignore')
 
+        # Position choices=['default', 'sequence', 'tree', 'path'], default='default'
+        self.position_style = self.config['position_style']
+
+
     def mapping_to_cuda(self, tensor):
         return tensor.to(self.device) if tensor is not None and self.is_cuda else tensor

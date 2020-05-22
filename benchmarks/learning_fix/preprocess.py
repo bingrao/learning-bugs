@@ -9,6 +9,23 @@ import torch
 import numpy as np
 
 PAD_INDEX = 0
+
+class DataObject:
+    def __init__(self, src, src_pos, tgt, tgt_pos, d_model):
+        self.d_model = d_model
+        self.src = src
+        self.src_pos = src_pos
+        self.src_pos_dim = [self.expand(pos) for pos in self.src_pos]
+        self.tgt = tgt
+        self.tgt_pos = tgt_pos
+        self.tgt_pos_dim = [self.expand(pos) for pos in self.tgt_pos]
+
+    def expand(self, position):
+        index = list(filter(lambda x: x < self.d_model, position[1:]))
+        embedding = np.zeros(self.d_model, dtype=float)
+        embedding[index] = 1.0
+        return embedding
+
 class LFDataset(Dataset):
     def __init__(self,
                  ctx=None,
@@ -58,8 +75,9 @@ class LFDataset(Dataset):
     def __getitem__(self, idx):
         # Return a batch representation with
         # src, tgt_in, tgt_out and masks
-        src, src_pos, tgt, tgt_pos = self.data[idx]
-        return src, src_pos, tgt, tgt_pos
+        # src, src_pos, tgt, tgt_pos = self.data[idx]
+        return self.data[idx]
+
 
     def load(self):
         src_path = join(self.raw_dir, self.target, "buggy.txt")
@@ -77,28 +95,48 @@ class LFDataset(Dataset):
             tgt_raw_data = tgt_file.readlines()
 
         for src_line, tgt_line in zip(src_raw_data, tgt_raw_data):
-            src_tokens = list(src_line.split())
+            src_tokens_position = list(map(lambda x: x.split("@"), list(src_line.split())))
+            src_tokens = [token[0] for token in src_tokens_position]
             src_embedding = [self.src_vocab.get_token_embedding(token) for token in src_tokens]
 
             # In a sequence, we can use their indexes as the postion,
             # In a tree architecture, we use node postion in the AST as correponding tokens' position
-            src_pos = [idx for idx, _ in enumerate(src_embedding)]
+            if self.context.position_style == 'sequence':
+                src_pos = [idx for idx, _ in enumerate(src_embedding)]
+            elif self.context.position_style == 'tree' or self.context.position_style == 'path':
+                # A position for a token is a list of nums, for example:
+                # void --> [57, 1, 5, 7, 45] means the position vector size is 57,
+                # and the index of [1, 5, 7, 45] are 1, the others are all zeros.
+                src_pos = [list(eval(token[-1])) for token in src_tokens_position]
+            else:
+                src_pos = None
 
-            tgt_tokens = self.tgt_vocab.wrapping_tokens(list(tgt_line.split()))
+
+            tgt_tokens_position = list(map(lambda x: x.split("@"), list(tgt_line.split())))
+            tgt_tokens = self.tgt_vocab.wrapping_tokens([token[0] for token in tgt_tokens_position])
             tgt_embedding = [self.tgt_vocab.get_token_embedding(token) for token in tgt_tokens]
 
             # In a sequence, we can use their indexes as the postion,
             # In a tree architecture, we use node postion in the AST as correponding tokens' position
-            tgt_pos = [idx for idx, _ in enumerate(tgt_embedding)]
+            if self.context.position_style == 'sequence':
+                tgt_pos = [idx for idx, _ in enumerate(tgt_embedding)]
+            elif self.context.position_style == 'tree' or self.context.position_style == 'path':
+                tgt_pos = [list(eval(token[-1])) for token in tgt_tokens_position]
+            else:
+                tgt_pos = None
 
             # save intermedate data into files for Debug Purpose
             if self.context.isDebug:
-                raw_data.append((src_line, tgt_line))
-                raw_token.append((src_tokens, tgt_tokens))
-                raw_embedding.append((src_embedding, tgt_embedding))
-                raw_position.append((src_pos, tgt_pos))
+                if src_line is not None:
+                    raw_data.append((src_line, tgt_line))
+                if src_tokens is not None:
+                    raw_token.append((src_tokens, tgt_tokens))
+                if src_embedding is not None:
+                    raw_embedding.append((src_embedding, tgt_embedding))
+                if src_pos is not None:
+                    raw_position.append((src_pos, tgt_pos))
 
-            self.data.append((src_embedding, src_pos, tgt_embedding, tgt_pos))
+            self.data.append(DataObject(src_embedding, src_pos, tgt_embedding, tgt_pos, self.context.d_model))
 
         if self.context.isDebug:
             raw_data_path = join(self.processed_dir, f'{self.target}-raw.txt')
@@ -122,11 +160,11 @@ def collate_fn_default(batch):
     By default, there is no positions for src and tgt
     """
 
-    src_max_len = max([len(src) for src, _, _, _ in batch])
-    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
+    src_max_len = max([len(ele.src) for ele in batch])
+    tgt_max_len = max([len(ele.tgt) for ele in batch])
 
-    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
-    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
+    srcs_padded = [ele.src + [PAD_INDEX] * (src_max_len - len(ele.src)) for ele in batch]
+    tgts_padded = [ele.tgt + [PAD_INDEX] * (tgt_max_len - len(ele.tgt)) for ele in batch]
 
     srcs_tensor = torch.tensor(srcs_padded)
     tgts_tensor = torch.tensor(tgts_padded)
@@ -144,16 +182,16 @@ def collate_fn_sequence(batch):
         tgt_pos = [0, 1, 2, 3, 4, 5, 6, 8]
     """
 
-    src_max_len = max([len(src) for src, _, _, _ in batch])
-    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
+    src_max_len = max([len(ele.src) for ele in batch])
+    tgt_max_len = max([len(ele.tgt) for ele in batch])
 
-    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
-    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
+    srcs_padded = [ele.src + [PAD_INDEX] * (src_max_len - len(ele.src)) for ele in batch]
+    tgts_padded = [ele.tgt + [PAD_INDEX] * (tgt_max_len - len(ele.tgt)) for ele in batch]
 
-    srcs_pos_padded = [src_pos + list(range(max(src_pos) + 1, max(src_pos) + 1 + (src_max_len - len(src_pos))))
-                       for _, src_pos, _, _ in batch]
-    tgts_pos_padded = [tgt_pos + list(range(max(tgt_pos) + 1, max(tgt_pos) + 1 + (tgt_max_len - len(tgt_pos))))
-                       for _, _, _, tgt_pos in batch]
+    srcs_pos_padded = [ele.src_pos + list(range(max(src_pos) + 1, max(ele.src_pos) + 1 + (src_max_len - len(ele.src_pos))))
+                       for ele in batch]
+    tgts_pos_padded = [ele.tgt_pos + list(range(max(ele.tgt_pos) + 1, max(ele.tgt_pos) + 1 + (tgt_max_len - len(ele.tgt_pos))))
+                       for ele in batch]
 
     srcs_tensor = torch.tensor(srcs_padded)
     tgts_tensor = torch.tensor(tgts_padded)
@@ -176,20 +214,19 @@ def collate_fn_tree(batch):
         length = max(map(len, x))
         return np.array([xi + [0.0] * (length - len(xi)) for xi in x])
 
-    src_max_len = max([len(src) for src, _, _, _ in batch])
-    tgt_max_len = max([len(tgt) for _, _, tgt, _ in batch])
+    src_max_len = max([len(ele.src) for ele in batch])
+    tgt_max_len = max([len(ele.tgt) for ele in batch])
 
-    srcs_padded = [src + [PAD_INDEX] * (src_max_len - len(src)) for src, _, _, _ in batch]
-    tgts_padded = [tgt + [PAD_INDEX] * (tgt_max_len - len(tgt)) for _, _, tgt, _ in batch]
+    srcs_padded = [ele.src + [PAD_INDEX] * (src_max_len - len(ele.src)) for ele in batch]
+    tgts_padded = [ele.tgt + [PAD_INDEX] * (tgt_max_len - len(ele.tgt)) for ele in batch]
 
-    default_dim_pos = 64
-    empty_pos = [0.0] * default_dim_pos
 
-    srcs_pos_alian = [src_pos + [empty_pos] * (src_max_len - len(src_pos)) for _, src_pos, _, _ in batch]
-    tgts_pos_alian = [tgt_pos + [empty_pos] * (tgt_max_len - len(tgt_pos)) for _, _, _, tgt_pos in batch]
 
-    srcs_pos_padded = [padding_vector(vector) for vector in srcs_pos_alian]
-    tgts_pos_padded = [padding_vector(vector) for vector in tgts_pos_alian]
+    srcs_pos_padded = [ele.src_pos_dim + [[0.0]*ele.d_model] * (src_max_len - len(ele.src_pos)) for ele in batch]
+    tgts_pos_padded = [ele.tgt_pos_dim + [[0.0]*ele.d_model] * (tgt_max_len - len(ele.tgt_pos)) for ele in batch]
+
+    # srcs_pos_padded = [padding_vector(vector) for vector in srcs_pos_alian]
+    # tgts_pos_padded = [padding_vector(vector) for vector in tgts_pos_alian]
 
     srcs_tensor = torch.tensor(srcs_padded)
     tgts_tensor = torch.tensor(tgts_padded)
