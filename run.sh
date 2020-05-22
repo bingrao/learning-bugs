@@ -38,6 +38,9 @@ ProjectLog=${ProjectBechmarks}/logs/${model}-${CurrentDate}.log
 # Default Checkpoint file
 ProjectCheckpoint=${ProjectBechmarks}/checkpoints/checkpoint-${ProjectName}.pth
 
+# choices=['default', 'sequence', 'tree', 'path'], default='tree'
+Positional_Style="default"
+
 case ${model} in
   "abstract")
     set -x
@@ -54,6 +57,7 @@ case ${model} in
                               --project_log="${ProjectLog}" \
                               --project_checkpoint="${ProjectCheckpoint}" \
                               --debug=True \
+                              --position_style=${Positional_Style} \
                               --phase="${model}"
   ;;
   "train")
@@ -68,6 +72,7 @@ case ${model} in
                                       --debug=False \
                                       --phase="${model}" \
                                       --device='cuda' \
+                                      --position_style=${Positional_Style} \
                                       --device_id=[1]
 
   ;;
@@ -84,6 +89,7 @@ case ${model} in
                               --phase="${model}" \
                               --device='cuda' \
                               --device_id=[1] \
+                              --position_style=${Positional_Style} \
                               --source="private TYPE_1 getType ( TYPE_2 VAR_1 ) { TYPE_3 VAR_2 = new TYPE_3 ( STRING_1 ) ; return new TYPE_1 ( VAR_2 , VAR_2 ) ; }"
 
   ;;
@@ -100,6 +106,7 @@ case ${model} in
                               --phase="${model}" \
                                --device='cuda' \
                               --device_id=[1] \
+                              --position_style=${Positional_Style} \
                               --save_result="${ProjectProcessedDataDir}"/"${ProjectName}"_eval.txt
   ;;
    *)

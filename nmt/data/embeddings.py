@@ -114,12 +114,12 @@ class PositionalEncoding(torch.nn.Module):
                 token. Since the size of vectors of each token may be different, so we need to pad them to 
                 same dimension: d_model
                 """
-                batch_size, seq_len = position.size()  # dim: (batch_size, seq_len) # dim: (batch_size, seq_len)
+                # batch_size, seq_len = position.size()  # dim: (batch_size, seq_len) # dim: (batch_size, seq_len)
 
-                x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
-
+                # x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
+                x = x + Variable(position, requires_grad=False)
             elif position is not None and self.context.position_style == 'path':
-                x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
+                x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False) + Variable(position, requires_grad=False)
 
             else:
                 """

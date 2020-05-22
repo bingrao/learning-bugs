@@ -15,16 +15,21 @@ class DataObject:
         self.d_model = d_model
         self.src = src
         self.src_pos = src_pos
-        self.src_pos_dim = [self.expand(pos) for pos in self.src_pos]
+        if self.src_pos is not None:
+            self.src_pos_dim = [self.expand(pos) for pos in self.src_pos]
         self.tgt = tgt
         self.tgt_pos = tgt_pos
-        self.tgt_pos_dim = [self.expand(pos) for pos in self.tgt_pos]
+        if self.tgt_pos is not None:
+            self.tgt_pos_dim = [self.expand(pos) for pos in self.tgt_pos]
 
     def expand(self, position):
-        index = list(filter(lambda x: x < self.d_model, position[1:]))
-        embedding = np.zeros(self.d_model, dtype=float)
-        embedding[index] = 1.0
-        return embedding
+        if type(position) is list:
+            index = list(filter(lambda x: x < self.d_model, position[1:]))
+            embedding = np.zeros(self.d_model, dtype=int)
+            embedding[index] = 1
+            return embedding
+        else:
+            position
 
 class LFDataset(Dataset):
     def __init__(self,
@@ -222,11 +227,8 @@ def collate_fn_tree(batch):
 
 
 
-    srcs_pos_padded = [ele.src_pos_dim + [[0.0]*ele.d_model] * (src_max_len - len(ele.src_pos)) for ele in batch]
-    tgts_pos_padded = [ele.tgt_pos_dim + [[0.0]*ele.d_model] * (tgt_max_len - len(ele.tgt_pos)) for ele in batch]
-
-    # srcs_pos_padded = [padding_vector(vector) for vector in srcs_pos_alian]
-    # tgts_pos_padded = [padding_vector(vector) for vector in tgts_pos_alian]
+    srcs_pos_padded = [ele.src_pos_dim + [[0]*ele.d_model] * (src_max_len - len(ele.src_pos)) for ele in batch]
+    tgts_pos_padded = [ele.tgt_pos_dim + [[0]*ele.d_model] * (tgt_max_len - len(ele.tgt_pos)) for ele in batch]
 
     srcs_tensor = torch.tensor(srcs_padded)
     tgts_tensor = torch.tensor(tgts_padded)

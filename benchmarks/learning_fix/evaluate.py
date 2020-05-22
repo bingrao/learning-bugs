@@ -8,11 +8,13 @@ from utils.context import Context
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 class Evaluator:
-    def __init__(self, ctx, pred=None, save_filepath=None):
+    def __init__(self, ctx, pred=None, save_filepath=None,
+                 src_dictionary=None, tgt_dictionary=None):
         self.context = ctx
         self.predictor = pred
         self.save_filepath = save_filepath
-
+        self.src_dict = src_dictionary
+        self.tgt_dict = tgt_dictionary
     def evaluate_dataset(self, data_iter):
         def tokenize(x):
             return x.split()
@@ -27,7 +29,7 @@ class Evaluator:
             predictions.append(prediction)
 
         hypotheses = [tokenize(prediction) for prediction in predictions]
-        list_of_references = [[tokenize(batch.trg)] for batch in data_iter]
+        list_of_references = [list(map(self.tgt_dict.idx2word, batch.trg)) for batch in data_iter]
         smoothing_function = SmoothingFunction()
 
         with open(self.save_filepath, 'w') as file:
@@ -80,7 +82,8 @@ if __name__ == "__main__":
     else:
         eval_filepath = context.save_result
 
-    evaluator = Evaluator(ctx=context, pred=predictor, save_filepath=eval_filepath)
+    evaluator = Evaluator(ctx=context, pred=predictor, save_filepath=eval_filepath, src_dictionary=source_dictionary,
+                          tgt_dictionary=target_dictionary)
 
     logger.info('Evaluating...')
     bleu_score = evaluator.evaluate_dataset(test_iter)
