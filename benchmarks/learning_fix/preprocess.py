@@ -4,7 +4,7 @@ from benchmarks.learning_fix.Vocabulary import Vocabulary
 from utils.context import Context, create_dir
 from torch.utils.data import DataLoader
 from nmt.data.batch import Batch
-from os.path import join
+from os.path import join, exists
 import torch
 import numpy as np
 
@@ -87,51 +87,57 @@ class LFDataset(Dataset):
     def load(self):
         src_path = join(self.raw_dir, self.target, "buggy.txt")
         tgt_path = join(self.raw_dir, self.target, "fixed.txt")
+        raw_embedding_path = join(self.processed_dir, f'{self.target}-embedding.txt')
+        raw_pos_path = join(self.processed_dir, f'{self.target}-pos.txt')
 
-        # Debug
-        raw_data = []
-        raw_token = []
-        raw_embedding = []
-        raw_position = []
+        def _parse_data():
+            self.logger.info(f"Parsing ${self.target} data from raw data ...")
+            raw_data_path = join(self.processed_dir, f'{self.target}-raw.txt')
+            raw_token_path = join(self.processed_dir, f'{self.target}-token.txt')
 
-        with open(src_path) as src_file:
-            src_raw_data = src_file.readlines()
-        with open(tgt_path) as tgt_file:
-            tgt_raw_data = tgt_file.readlines()
+            # Debug
+            raw_data = []
+            raw_token = []
+            raw_embedding = []
+            raw_position = []
 
-        for src_line, tgt_line in zip(src_raw_data, tgt_raw_data):
-            src_tokens_position = list(map(lambda x: x.split("@"), list(src_line.split())))
-            src_tokens = [token[0] for token in src_tokens_position]
-            src_embedding = [self.src_vocab.get_token_embedding(token) for token in src_tokens]
+            with open(src_path) as src_file:
+                src_raw_data = src_file.readlines()
+            with open(tgt_path) as tgt_file:
+                tgt_raw_data = tgt_file.readlines()
 
-            # In a sequence, we can use their indexes as the postion,
-            # In a tree architecture, we use node postion in the AST as correponding tokens' position
-            if self.context.position_style == 'sequence':
-                src_pos = [idx for idx, _ in enumerate(src_embedding)]
-            elif self.context.position_style == 'tree' or self.context.position_style == 'path':
-                # A position for a token is a list of nums, for example:
-                # void --> [57, 1, 5, 7, 45] means the position vector size is 57,
-                # and the index of [1, 5, 7, 45] are 1, the others are all zeros.
-                src_pos = [list(eval(token[-1])) for token in src_tokens_position]
-            else:
-                src_pos = None
+            for src_line, tgt_line in zip(src_raw_data, tgt_raw_data):
+                src_tokens_position = list(map(lambda x: x.split("@"), list(src_line.split())))
+                src_tokens = [token[0] for token in src_tokens_position]
+                src_embedding = [self.src_vocab.get_token_embedding(token) for token in src_tokens]
+
+                # In a sequence, we can use their indexes as the postion,
+                # In a tree architecture, we use node postion in the AST as correponding tokens' position
+                if self.context.position_style == 'sequence':
+                    src_pos = [idx for idx, _ in enumerate(src_embedding)]
+                elif self.context.position_style == 'tree' or self.context.position_style == 'path':
+                    # A position for a token is a list of nums, for example:
+                    # void --> [57, 1, 5, 7, 45] means the position vector size is 57,
+                    # and the index of [1, 5, 7, 45] are 1, the others are all zeros.
+                    src_pos = [list(eval(token[-1])) for token in src_tokens_position]
+                else:
+                    src_pos = None
 
 
-            tgt_tokens_position = list(map(lambda x: x.split("@"), list(tgt_line.split())))
-            tgt_tokens = self.tgt_vocab.wrapping_tokens([token[0] for token in tgt_tokens_position])
-            tgt_embedding = [self.tgt_vocab.get_token_embedding(token) for token in tgt_tokens]
+                tgt_tokens_position = list(map(lambda x: x.split("@"), list(tgt_line.split())))
+                tgt_tokens = self.tgt_vocab.wrapping_tokens([token[0] for token in tgt_tokens_position])
+                tgt_embedding = [self.tgt_vocab.get_token_embedding(token) for token in tgt_tokens]
 
-            # In a sequence, we can use their indexes as the postion,
-            # In a tree architecture, we use node postion in the AST as correponding tokens' position
-            if self.context.position_style == 'sequence':
-                tgt_pos = [idx for idx, _ in enumerate(tgt_embedding)]
-            elif self.context.position_style == 'tree' or self.context.position_style == 'path':
-                tgt_pos = [list(eval(token[-1])) for token in tgt_tokens_position]
-            else:
-                tgt_pos = None
+                # In a sequence, we can use their indexes as the postion,
+                # In a tree architecture, we use node postion in the AST as correponding tokens' position
+                if self.context.position_style == 'sequence':
+                    tgt_pos = [idx for idx, _ in enumerate(tgt_embedding)]
+                elif self.context.position_style == 'tree' or self.context.position_style == 'path':
+                    tgt_pos = [list(eval(token[-1])) for token in tgt_tokens_position]
+                else:
+                    tgt_pos = None
 
-            # save intermedate data into files for Debug Purpose
-            if self.context.isDebug:
+                # save intermedate data into files for Debug Purpose
                 if src_line is not None:
                     raw_data.append((src_line, tgt_line))
                 if src_tokens is not None:
@@ -141,13 +147,7 @@ class LFDataset(Dataset):
                 if src_pos is not None:
                     raw_position.append((src_pos, tgt_pos))
 
-            self.data.append(DataObject(src_embedding, src_pos, tgt_embedding, tgt_pos, self.context.d_model))
-
-        if self.context.isDebug:
-            raw_data_path = join(self.processed_dir, f'{self.target}-raw.txt')
-            raw_token_path = join(self.processed_dir, f'{self.target}-token.txt')
-            raw_embedding_path = join(self.processed_dir, f'{self.target}-embedding.txt')
-            raw_pos_path = join(self.processed_dir, f'{self.target}-pos.txt')
+                self.data.append(DataObject(src_embedding, src_pos, tgt_embedding, tgt_pos, self.context.d_model))
 
             with open(raw_data_path, 'w') as f1, \
                     open(raw_token_path, 'w') as f2, \
@@ -157,6 +157,44 @@ class LFDataset(Dataset):
                 f2.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_token)))
                 f3.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_embedding)))
                 f4.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_position)))
+
+        def _load():
+            self.logger.info(f"Loading ${self.target}  data from existing previous results ...")
+            with open(raw_embedding_path) as src_file:
+                embedding_data = src_file.readlines()
+
+            if self.context.position_style == 'default':
+                for embedding in embedding_data:
+                    src_embedding = list(eval(embedding.split("\t")[0]))
+                    tgt_embedding = list(eval(embedding.split("\t")[-1]))
+                    src_pos = None
+                    tgt_pos = None
+                    self.data.append(DataObject(src_embedding, src_pos, tgt_embedding, tgt_pos, self.context.d_model))
+            else:
+                with open(raw_pos_path) as tgt_file:
+                    positions_data = tgt_file.readlines()
+
+                for embedding, position in zip(embedding_data, positions_data):
+                    src_embedding = list(eval(embedding.split("\t")[0]))
+                    tgt_embedding = list(eval(embedding.split("\t")[-1]))
+                    src_pos = list(eval(position.split("\t")[0]))
+                    tgt_pos = list(eval(position.split("\t")[-1]))
+                    self.data.append(DataObject(src_embedding, src_pos, tgt_embedding, tgt_pos, self.context.d_model))
+
+
+
+
+
+        if self.context.position_style == "default":
+            if exists(raw_embedding_path):
+                _load()
+            else:
+                _parse_data()
+        else:
+            if exists(raw_embedding_path) and exists(raw_pos_path):
+                _load()
+            else:
+                _parse_data()
 
 def collate_fn_default(batch):
     """
