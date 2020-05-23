@@ -156,7 +156,7 @@ class Predictor:
 
         source_embedding, source_position = self.source_dictionary.preprocess(source)
 
-        self.logger.info("[%s] The corresponding indexes of [%s]: %s, Position %s", self.__class__.__name__,
+        self.logger.debug("[%s] The corresponding indexes of [%s]: %s, Position %s", self.__class__.__name__,
                           str(source), str(source_embedding), str(source_position))
         # dimision (1, seq_len)
         source_tensor = torch.tensor(source_embedding).unsqueeze(0)
@@ -182,7 +182,7 @@ class Predictor:
         # dimision (1, seq_len, d_model)
         memory = self.model.encode(source, sources_mask, source_position)
 
-        self.logger.info("[%s] Encoder Source %s, Output %s dimensions", self.__class__.__name__,
+        self.logger.debug("[%s] Encoder Source %s, Output %s dimensions", self.__class__.__name__,
                           source.size(), memory.size())
 
         # memory_mask = pad_masking(source, 1)
