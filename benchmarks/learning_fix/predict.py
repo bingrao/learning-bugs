@@ -36,8 +36,8 @@ class Beam:
         self.ranker = ranker
 
     def advance(self, next_log_probs, current_attention):
-        # next_probs : beam_size X vocab_size
-        # current_attention: (target_seq_len=1, beam_size, source_seq_len)
+        # next_probs : (beam_size=8, d_model=128)
+        # current_attention: (beam_size=8, #heads=8, seq_len=1, d_model=128)
 
         vocabulary_size = next_log_probs.size(1)
         # current_beam_size = next_log_probs.size(0)
@@ -158,13 +158,13 @@ class Predictor:
 
         self.logger.info("[%s] The corresponding indexes of [%s]: %s, Position %s", self.__class__.__name__,
                           str(source), str(source_embedding), str(source_position))
-
+        # dimision (1, seq_len)
         source_tensor = torch.tensor(source_embedding).unsqueeze(0)
         if source_position is not None:
             source_position = torch.tensor(source_position).unsqueeze(0)
         else:
             source_position = None
-        length_tensor = torch.tensor(len(source)).unsqueeze(0)
+        length_tensor = torch.tensor(len(source)).unsqueeze(0) # (1, 1)
         self.logger.debug("[%s] The index source Tensor: %s, lenght %s", self.__class__.__name__,
                           source_tensor, length_tensor)
 
@@ -179,7 +179,7 @@ class Predictor:
         source_position = self.context.mapping_to_cuda(source_position)
         sources_mask = self.context.mapping_to_cuda(sources_mask)
 
-
+        # dimision (1, seq_len, d_model)
         memory = self.model.encode(source, sources_mask, source_position)
 
         self.logger.info("[%s] Encoder Source %s, Output %s dimensions", self.__class__.__name__,
@@ -189,7 +189,7 @@ class Predictor:
         memory_mask = sources_mask
 
         # Repeat beam_size times
-        # (beam_size, seq_len, hidden_size)
+        # (beam_size, seq_len, d_model)
         memory_beam = memory.detach().repeat(self.beam_size, 1, 1)
 
         self.logger.debug("[%s] Memory %s dimension", self.__class__.__name__, memory_beam.size())
@@ -203,11 +203,13 @@ class Predictor:
                     end_token_id=self.end_token_id)
 
         for _ in range(self.max_length):
-
-            new_inputs = beam.get_current_state().unsqueeze(1)  # (beam_size, seq_len=1)
+            # Generated a new token with dimension (beam_size, seq_len=1)
+            new_inputs = beam.get_current_state().unsqueeze(1)
             new_mask = make_std_mask(new_inputs, 0)
             new_inputs = self.context.mapping_to_cuda(new_inputs)
             new_mask = self.context.mapping_to_cuda(new_mask)
+
+            # dimension (bean_size, 1, d_model)
             decoder_outputs = self.model.decode(tgt=new_inputs,
                                                 memory=memory_beam,
                                                 memory_mask=memory_mask,
@@ -215,7 +217,7 @@ class Predictor:
 
             self.logger.debug("[%s] Decoder Input %s, output %s dimensions",
                               self.__class__.__name__, new_inputs.size(), decoder_outputs.size())
-
+            # dimension (beam_size, #heads, seq_len, d_model)
             attention = self.model.decoder.layers[-1].src_attn.attention
             self.logger.debug("[%s] attention %s dimension", self.__class__.__name__, attention.size())
 

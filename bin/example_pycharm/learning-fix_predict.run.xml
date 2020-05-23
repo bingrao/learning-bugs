@@ -12,7 +12,7 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/benchmarks/learning_fix/predict.py" />
-    <option name="PARAMETERS" value="--project_name learning_fix --project_config $PROJECT_DIR$/benchmarks/learning_fix/configs/default_config.json --project_raw_dir $PROJECT_DIR$/benchmarks/learning_fix/data --project_processed_dir $PROJECT_DIR$/benchmarks/learning_fix/processed --project_log $PROJECT_DIR$/benchmarks/learning_fix/logs/predict-2020-05-22.log --project_checkpoint $PROJECT_DIR$/benchmarks/learning_fix/checkpoints/checkpoint-learning_fix.pth --debug False --phase=predict --device=cuda --device_id=[1] --position_style default --source=&quot;private TYPE_1 getType ( TYPE_2 VAR_1 ) { TYPE_3 VAR_2 = new TYPE_3 ( STRING_1 ) ; return new TYPE_1 ( VAR_2 , VAR_2 ) ; }&quot;" />
+    <option name="PARAMETERS" value="--project_name learning_fix --project_config $PROJECT_DIR$/benchmarks/learning_fix/configs/default_config.json --project_raw_dir $PROJECT_DIR$/benchmarks/learning_fix/data --project_processed_dir $PROJECT_DIR$/benchmarks/learning_fix/processed --project_log $PROJECT_DIR$/benchmarks/learning_fix/logs/predict-2020-05-22.log --project_checkpoint $PROJECT_DIR$/benchmarks/learning_fix/checkpoints/checkpoint-learning_fix.pth --debug False --phase=predict --device=cpu --device_id=[1] --position_style default --source=&quot;private TYPE_1 getType ( TYPE_2 VAR_1 ) { TYPE_3 VAR_2 = new TYPE_3 ( STRING_1 ) ; return new TYPE_1 ( VAR_2 , VAR_2 ) ; }&quot;" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
