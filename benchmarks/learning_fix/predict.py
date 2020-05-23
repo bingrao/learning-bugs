@@ -1,16 +1,15 @@
-import torch
-from torch.autograd import Variable
 from nmt.model.transformer.model import build_model
 from utils.context import Context
-from nmt.utils.pad import subsequent_mask
+from nmt.utils.pad import make_std_mask
 from benchmarks.learning_fix.preprocess import dataset_generation
 import os
+import torch
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 class Beam:
 
     def __init__(self, ctx=None, beam_size=4, min_length=0, n_top=1, ranker=None,
-                 start_token_id=2, end_token_id=3):
+                 start_token_id=8, end_token_id=9):
         self.context = ctx
         self.beam_size = beam_size
         self.min_length = min_length
@@ -82,11 +81,11 @@ class Beam:
             self.top_sentence_ended = True
 
     def get_current_state(self):
-        "Get the outputs for the current timestep."
+        """Get the outputs for the current timestep."""
         return self.next_ys[-1]
 
     def get_current_origin(self):
-        "Get the backpointers for the current timestep."
+        """Get the backpointers for the current timestep."""
         return self.prev_ks[-1]
 
     def done(self):
@@ -119,14 +118,6 @@ class Beam:
         return scores, ks
 
 
-def make_std_mask(tgt, pad):
-    """Create a mask to hide padding and future words."""
-    tgt_mask = (tgt != pad).unsqueeze(-2)
-    tgt_mask = tgt_mask & Variable(
-        subsequent_mask(tgt.size(-1)).type_as(tgt_mask.data))
-    return tgt_mask
-
-
 class Predictor:
     def __init__(self, ctx, m, src_dictionary, tgt_dictionary, max_length=50, beam_size=8):
         self.context = ctx
@@ -134,7 +125,8 @@ class Predictor:
         self.model = m
         self.source_dictionary = src_dictionary
         self.target_dictionary = tgt_dictionary
-
+        self.start_token_id = self.target_dictionary.start_token_id
+        self.end_token_id = self.target_dictionary.end_token_id
         self.max_length = max_length
         self.beam_size = beam_size
         self.attentions = None
@@ -164,7 +156,7 @@ class Predictor:
 
         source_embedding, source_position = self.source_dictionary.preprocess(source)
 
-        self.logger.debug("[%s] The corresponding indexes of [%s]: %s, Position %s", self.__class__.__name__,
+        self.logger.info("[%s] The corresponding indexes of [%s]: %s, Position %s", self.__class__.__name__,
                           str(source), str(source_embedding), str(source_position))
 
         source_tensor = torch.tensor(source_embedding).unsqueeze(0)
@@ -190,7 +182,7 @@ class Predictor:
 
         memory = self.model.encode(source, sources_mask, source_position)
 
-        self.logger.debug("[%s] Encoder Source %s, Output %s dimensions", self.__class__.__name__,
+        self.logger.info("[%s] Encoder Source %s, Output %s dimensions", self.__class__.__name__,
                           source.size(), memory.size())
 
         # memory_mask = pad_masking(source, 1)
@@ -206,7 +198,9 @@ class Predictor:
                     beam_size=self.beam_size,
                     min_length=0,
                     n_top=num_candidates,
-                    ranker=None)
+                    ranker=None,
+                    start_token_id=self.start_token_id,
+                    end_token_id=self.end_token_id)
 
         for _ in range(self.max_length):
 

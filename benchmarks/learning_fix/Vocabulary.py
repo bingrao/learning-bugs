@@ -1,5 +1,5 @@
 from utils.context import create_dir
-from os.path import join
+from os.path import join, exists
 import collections
 
 
@@ -16,13 +16,15 @@ class Vocabulary:
         assert target != "buggy" or target != "fixed"
         self.context = ctx
         self.logger = ctx.logger
+        self.target = target
         self.start_token = '<Start>'
         self.end_token = '<End>'
         self.raw_dir = join(self.context.project_raw_dir, dataset)
         self.processed_dir = join(self.context.project_processed_dir, dataset)
         create_dir(self.processed_dir)
+        self.vocab_path = join(self.processed_dir, f"vocab.{self.target}.txt")
         self.token_embedding = embedding
-        self.target = target
+        self.token_embedding = embedding
         self.min_frequency = min_frequency
         self.max_vocab_size = max_vocab_size
         self.downcase = downcase
@@ -31,8 +33,9 @@ class Vocabulary:
         self.words = [word for word, _ in self.word_with_count]  # ['key', ..., 'for']
         self.word2idx = dict((w, i) for i, w in enumerate(self.words))
         self.idx2word = dict((i, w) for i, w in enumerate(self.words))
-
         self.unk_token = len(self.words)
+        self.start_token_id = self.word2idx[self.start_token] if target == "fixed" else 0
+        self.end_token_id = self.word2idx[self.end_token] if target == "fixed" else 1
 
     def __len__(self):
         return len(self.words) + 1
@@ -90,49 +93,54 @@ class Vocabulary:
         return [self.start_token] + seq_tokens + [self.end_token]
 
     def _build_vocab(self):
-        self.logger.info(f"Building {self.target} vocabulary with max size {self.max_vocab_size}")
+        if exists(self.vocab_path):
+            self.logger.info(f"Loading {self.target} vocabulary from {self.vocab_path}")
+            with open(self.vocab_path) as vocab_file:
+                vocab_raw_data = vocab_file.readlines()
+            word_with_counts = list(map(lambda x: (x[1], int(x[2])), [list(vocab.split("\t")) for vocab in vocab_raw_data]))
+        else:
+            self.logger.info(f"Building {self.target} vocabulary with max size {self.max_vocab_size}")
+            # Counter for all tokens in the vocabulary
+            cnt = collections.Counter()
+            source_path = join(self.raw_dir, "train", f"{self.target}.txt")
+            with open(source_path) as file:
+                for line in file:
+                    if self.downcase:
+                        line = line.lower()
+                    if self.delimiter == "":
+                        tokens = list(line.strip())
+                    else:
+                        tokens = line.strip().split(self.delimiter)
 
-        # Counter for all tokens in the vocabulary
-        cnt = collections.Counter()
-        source_path = join(self.raw_dir, "train", f"{self.target}.txt")
-        with open(source_path) as file:
-            for line in file:
-                if self.downcase:
-                    line = line.lower()
-                if self.delimiter == "":
-                    tokens = list(line.strip())
-                else:
-                    tokens = line.strip().split(self.delimiter)
+                    # In the input source code, token and its corresponding position is seperated by "@"
+                    tokens = [token.split("@")[0] for token in tokens if len(token) > 0]
 
-                # In the input source code, token and its corresponding position is seperated by "@"
-                tokens = [token.split("@")[0] for token in tokens if len(token) > 0]
+                    if self.target == "fixed":
+                        tokens = [self.start_token] + tokens + [self.end_token]
+                    cnt.update(tokens)
 
-                if self.target == "fixed":
-                    tokens = [self.start_token] + tokens + [self.end_token]
-                cnt.update(tokens)
+            self.logger.info(f"Found {len(cnt)} unique tokens in the {self.target} vocabulary.")
 
-        self.logger.info(f"Found {len(cnt)} unique tokens in the {self.target} vocabulary.")
+            # Filter tokens below the frequency threshold
+            if self.min_frequency > 0:
+                filtered_tokens = [(w, c) for w, c in cnt.most_common() if c > self.min_frequency]
+                cnt = collections.Counter(dict(filtered_tokens))
 
-        # Filter tokens below the frequency threshold
-        if self.min_frequency > 0:
-            filtered_tokens = [(w, c) for w, c in cnt.most_common() if c > self.min_frequency]
-            cnt = collections.Counter(dict(filtered_tokens))
+            self.logger.info(f"Found {len(cnt)} unique tokens with frequency "
+                             f"> {self.min_frequency} in the {self.target} vocabulary.")
 
-        self.logger.info(f"Found {len(cnt)} unique tokens with frequency "
-                         f"> {self.min_frequency} in the {self.target} vocabulary.")
+            # Sort tokens by:
+            #    1. frequency
+            #    2. lexically to break ties
+            word_with_counts = cnt.most_common()
+            word_with_counts = sorted(word_with_counts, key=lambda x: (x[1], x[0]), reverse=True)
 
-        # Sort tokens by:
-        #    1. frequency
-        #    2. lexically to break ties
-        word_with_counts = cnt.most_common()
-        word_with_counts = sorted(word_with_counts, key=lambda x: (x[1], x[0]), reverse=True)
+            # Take only max-vocab
+            if self.max_vocab_size is not None:
+                word_with_counts = word_with_counts[:self.max_vocab_size]
 
-        # Take only max-vocab
-        if self.max_vocab_size is not None:
-            word_with_counts = word_with_counts[:self.max_vocab_size]
-
-        if self.context.isDebug:
-            with open(join(self.processed_dir, f"vocab.{self.target}.txt"), 'w') as file:
+            with open(self.vocab_path, 'w') as file:
                 for idx, (word, count) in enumerate(word_with_counts):
                     file.write(f'{idx}\t{word}\t{count}\n')
+
         return word_with_counts
