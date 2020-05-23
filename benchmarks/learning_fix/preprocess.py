@@ -91,7 +91,7 @@ class LFDataset(Dataset):
         raw_pos_path = join(self.processed_dir, f'{self.target}-pos.txt')
 
         def _parse_data():
-            self.logger.info(f"Parsing ${self.target} data from raw data ...")
+            self.logger.info(f"Parsing {self.target} data from raw data ...")
             raw_data_path = join(self.processed_dir, f'{self.target}-raw.txt')
             raw_token_path = join(self.processed_dir, f'{self.target}-token.txt')
 
@@ -159,7 +159,7 @@ class LFDataset(Dataset):
                 f4.write("\n".join(map(lambda x: f'{x[0]}\t{x[1]}', raw_position)))
 
         def _load():
-            self.logger.info(f"Loading ${self.target}  data from existing previous results ...")
+            self.logger.info(f"Loading {self.target}  data from existing previous results ...")
             with open(raw_embedding_path) as src_file:
                 embedding_data = src_file.readlines()
 
